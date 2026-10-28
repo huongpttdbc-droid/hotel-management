@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Hệ Thống Quản Lý Khách Sạn</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #334155;
+            padding: 20px 15px;
+        }
+        .login-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+            max-width: 440px;
+            width: 100%;
+            padding: 40px 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .brand-logo {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 10px 20px -3px rgba(2, 132, 199, 0.35);
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 11px 15px;
+        }
+        .form-control:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 0.25rem rgba(2, 132, 199, 0.15);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(2, 132, 199, 0.35);
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+        <div class="brand-logo mb-3">
+            <i class="fa-solid fa-hotel"></i>
+        </div>
+        <h3 class="fw-bold text-dark m-0">HOTEL ADMIN</h3>
+        <p class="text-muted small mt-1">Đăng nhập hệ thống quản lý & lễ tân</p>
+    </div>
+
+    <!-- FORM ĐĂNG NHẬP -->
+    <form id="formLogin" onsubmit="handleLogin(event)">
+        <div class="mb-3">
+            <label class="form-label fw-bold small text-secondary">Tên đăng nhập</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+                <input type="text" id="username" class="form-control border-start-0" placeholder="Nhập tên đăng nhập của bạn" required autofocus autocomplete="username">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold small text-secondary">Mật khẩu</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                <input type="password" id="password" class="form-control border-start-0 border-end-0" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                <button class="btn btn-light border border-start-0 text-muted" type="button" onclick="togglePasswordVisibility()" title="Ẩn/Hiện mật khẩu">
+                    <i class="fa-solid fa-eye" id="eye-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                <label class="form-check-label small text-muted" for="rememberMe">Ghi nhớ đăng nhập</label>
+            </div>
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary btn-login w-100 fw-bold shadow-sm">
+            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Đăng Nhập
+        </button>
+    </form>
+
+    <!-- HƯỚNG DẪN TÀI KHOẢN (THU GỌN, KHÔNG HIỂN THỊ CỐ ĐỊNH TÊN LÊN GIAO DIỆN) -->
+    <div class="mt-4 pt-3 border-top text-center">
+        <a class="small text-muted text-decoration-none" data-bs-toggle="collapse" href="#helpAccounts" role="button" aria-expanded="false">
+            <i class="fa-solid fa-circle-question me-1"></i>Chọn nhanh tài khoản kiểm thử hoặc xem mẫu
+        </a>
+        <div class="collapse mt-2 text-start small p-3 bg-light rounded" id="helpAccounts">
+            <div class="fw-bold text-dark mb-1"><i class="fa-solid fa-shield-halved text-danger me-1"></i>Tài khoản Quản lý (bấm để đăng nhập):</div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="fillLogin('tuan.hm', 'Tuan@2026')">
+                    <i class="fa-solid fa-user-shield me-1"></i>Quản lý Tuấn (tuan.hm)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillLogin('admin', 'admin123')">
+                    Admin hệ thống
+                </button>
+            </div>
+            <div class="fw-bold text-dark mb-1"><i class="fa-solid fa-bell-concierge text-primary me-1"></i>Tài khoản Lễ tân (bấm để đăng nhập):</div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillLogin('hoa.nt', 'Hoa@2026')">
+                    <i class="fa-solid fa-bell-concierge me-1"></i>Lễ tân Hoa (hoa.nt)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillLogin('nam.tv', 'Nam@2026')">
+                    <i class="fa-solid fa-bell-concierge me-1"></i>Lễ tân Nam (nam.tv)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillLogin('mai.lt', 'Mai@2026')">
+                    <i class="fa-solid fa-bell-concierge me-1"></i>Lễ tân Mai (mai.lt)
+                </button>
+            </div>
+            <div class="text-muted fst-italic" style="font-size: 0.75rem;">* Có thể dùng mật khẩu mẫu hoặc mật khẩu kiểm thử chung: <code>123456</code> hoặc <code>admin123</code>.</div>
+        </div>
+
+        <div class="mt-3">
+            <a href="booking.html" class="small text-decoration-none text-secondary">
+                <i class="fa-solid fa-globe me-1 text-primary"></i>Đi tới Trang khách hàng đặt phòng trực tuyến &rarr;
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="js/api.js?v=2.1"></script>
+
+<script>
+// Đảm bảo AuthAPI luôn sẵn sàng kể cả khi trình duyệt lưu cache file js cũ
+if (typeof AuthAPI === 'undefined') {
+    const API_BASE = (window.location.port === '8000') ? '/api' : 'http://127.0.0.1:8000/api';
+    window.AuthAPI = {
+        login: async (username, password) => {
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const text = await res.text();
+            let data;
+            try { data = text ? JSON.parse(text) : {}; } catch(_) { data = { detail: text }; }
+            if (!res.ok) {
+                const msg = data && data.detail ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)) : `Lỗi ${res.status}`;
+                throw new Error(msg);
+            }
+            return data;
+        }
+    };
+}
+function togglePasswordVisibility() {
+    const input = document.getElementById('password');
+    const icon = document.getElementById('eye-icon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function fillLogin(u, p) {
+    document.getElementById('username').value = u;
+    document.getElementById('password').value = p;
+    handleLogin();
+}
+
+async function handleLogin(e) {
+    if (e) e.preventDefault();
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    const btn = document.getElementById('btn-submit');
+
+    if (!u || !p) {
+        Swal.fire('Lưu ý', 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.', 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xác thực...';
+
+    try {
+        const data = await AuthAPI.login(u, p);
+
+        // Lưu thông tin người đăng nhập
+        localStorage.setItem('hotel_user', JSON.stringify(data.user));
+        localStorage.setItem('hotel_token', data.access_token);
+
+        const isManager = (data.user.role === 'admin' || (data.user.chuc_vu && data.user.chuc_vu.includes('Quản lý')));
+        const roleTitle = isManager ? 'Ban Quản Lý' : (data.user.chuc_vu || 'Lễ Tân');
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Đăng nhập thành công!',
+            html: `Xin chào <strong>${data.user.name}</strong><br><span class="badge ${isManager ? 'bg-danger' : 'bg-primary'} mt-2 fs-6">${roleTitle}</span>`,
+            timer: 1100,
+            showConfirmButton: false
+        }).then(() => {
+            if (data.user.role === 'khach') {
+                window.location.href = 'booking.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+    } catch (err) {
+        Swal.fire('Lỗi đăng nhập', err.message || 'Tên đăng nhập hoặc mật khẩu không chính xác!', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Đăng Nhập';
+    }
+}
+</script>
+
+</body>
+</html>

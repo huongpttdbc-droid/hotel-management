@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Phòng Khách Sạn Trực Tuyến - Hotel Booking</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .hero {
+            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.85)), url('img/VIP.jpg') center/cover;
+            color: #ffffff;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .room-feature { font-size: 0.9rem; color: #64748b; }
+        .price-tag { font-size: 1.35rem; font-weight: 700; color: #0284c7; }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top px-4">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-info" href="booking.html">
+            <i class="fa-solid fa-hotel me-2"></i>LUXURY HOTEL
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <a href="index.html" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-user-shield me-1"></i>Dành cho Nhân Viên
+            </a>
+            <a href="login.html" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-user me-1"></i>Đăng nhập
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Trải Nghiệm Nghỉ Dưỡng Đẳng Cấp</h1>
+        <p class="lead text-light mb-4" style="max-width: 650px; margin: 0 auto;">
+            Không gian sang trọng, dịch vụ tận tâm và tiện nghi cao cấp tiêu chuẩn quốc tế đang chờ đón bạn.
+        </p>
+        <a href="#room-list-section" class="btn btn-primary btn-lg px-4 fw-bold shadow">
+            <i class="fa-solid fa-calendar-check me-2"></i>Khám Phá Phòng & Đặt Ngay
+        </a>
+    </div>
+</section>
+
+<!-- ROOM TYPES SECTION -->
+<div class="container my-5" id="room-list-section">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-dark">Các Hạng Phòng Tại Khách Sạn</h2>
+        <p class="text-muted">Chọn hạng phòng phù hợp với nhu cầu và phong cách của bạn</p>
+    </div>
+
+    <div class="row g-4" id="room-types-grid">
+        <div class="text-center py-5 text-muted col-12">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="mt-2">Đang tải danh sách phòng...</div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ĐẶT PHÒNG KHÁCH HÀNG -->
+<div class="modal fade" id="modalBookingOnline" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-calendar-plus text-info me-2"></i>Đặt Phòng Trực Tuyến</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="formOnlineBooking" onsubmit="submitOnlineBooking(event)">
+                    <div class="alert alert-info py-2 small mb-3">
+                        <i class="fa-solid fa-info-circle me-1"></i>
+                        Đặt phòng nhanh chỉ với vài thông tin cơ bản. Nhân viên khách sạn sẽ liên hệ xác nhận ngay lập tức!
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Họ và Tên Quý Khách</label>
+                            <input type="text" id="ob-name" class="form-control" placeholder="Nguyễn Văn A" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số Điện Thoại</label>
+                            <input type="tel" id="ob-phone" class="form-control" placeholder="0901234567" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số CCCD / CMND (12 số)</label>
+                            <input type="text" id="ob-cccd" class="form-control" maxlength="12" pattern="[0-9]{12}" placeholder="079..." required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ngày Sinh (từ 18 tuổi)</label>
+                            <input type="date" id="ob-dob" class="form-control" value="1995-01-01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Phòng Khách Sạn (còn trống)</label>
+                            <select id="ob-room" class="form-select" required>
+                                <option value="">-- Đang tải phòng trống... --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Hình Thức Thuê</label>
+                            <select id="ob-rent-type" class="form-select">
+                                <option value="Theo ngày" selected>Theo ngày</option>
+                                <option value="Theo giờ">Theo giờ</option>
+                                <option value="Qua đêm">Qua đêm</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Ghi Chú Đặc Biệt</label>
+                            <textarea id="ob-notes" class="form-control" rows="2" placeholder="Yêu cầu phòng tầng cao, check-in muộn..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0 mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary fw-bold px-4">Xác Nhận Đặt Phòng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-light py-4 text-center mt-5">
+    <div class="container">
+        <p class="m-0 small text-secondary">© 2026 LUXURY HOTEL · Hệ thống Quản Lý & Đặt Phòng Khách Sạn</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="js/api.js?v=2.1"></script>
+<script>
+const imageMap = {
+    'đơn': 'img/Don.jpg',
+    'đôi': 'img/Doi.jpg',
+    'gia đình': 'img/Giadinh.jpg',
+    'suite': 'img/Suite.jpg',
+    'vip': 'img/VIP.jpg'
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const types = await RoomAPI.getTypes();
+        const grid = document.getElementById('room-types-grid');
+
+        grid.innerHTML = types.map(t => {
+            const key = t.TenLoai.toLowerCase().trim();
+            const imgSrc = imageMap[key] || 'img/VIP.jpg';
+
+            return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card room-type-card h-100 bg-white">
+                        <img src="${imgSrc}" class="room-type-img" alt="${t.TenLoai}">
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h4 class="fw-bold m-0 text-dark">Hạng ${t.TenLoai}</h4>
+                                    <span class="badge bg-primary fs-6"><i class="fa-solid fa-user me-1"></i>${t.SucChua} người</span>
+                                </div>
+                                <p class="text-muted small mb-3">${t.MoTa || 'Phòng nghỉ đầy đủ tiện nghi tiêu chuẩn cao cấp.'}</p>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between text-muted small py-1 border-bottom">
+                                        <span>Theo ngày:</span>
+                                        <strong class="text-primary">${formatMoney(t.DonGiaTheoNgay)} / ngày</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted small py-1 border-bottom">
+                                        <span>Qua đêm:</span>
+                                        <strong>${formatMoney(t.DonGiaQuaDem)} / đêm</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted small py-1">
+                                        <span>Theo giờ:</span>
+                                        <strong>${formatMoney(t.DonGiaTheoGio)} / giờ</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary fw-bold w-100 mt-2" onclick="openBookingOnline('${t.MaLoaiPhong}')">
+                                <i class="fa-solid fa-calendar-check me-2"></i>Đặt Hạng Phòng Này
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        document.getElementById('room-types-grid').innerHTML = `<div class="alert alert-danger col-12">${err.message}</div>`;
+    }
+});
+
+async function openBookingOnline(maLoaiPhong = '') {
+    try {
+        const rooms = await RoomAPI.getAll(null, 'Trống');
+        const select = document.getElementById('ob-room');
+        
+        let filtered = rooms;
+        if (maLoaiPhong) {
+            filtered = rooms.filter(r => r.MaLoaiPhong === maLoaiPhong);
+            if (!filtered.length) filtered = rooms; // fallback nếu hết phòng loại đó
+        }
+
+        if (!filtered.length) {
+            Swal.fire('Rất tiếc', 'Hiện tại khách sạn đã kín tất cả các phòng trống. Quý khách vui lòng liên hệ lễ tân!', 'warning');
+            return;
+        }
+
+        select.innerHTML = filtered.map(r => `
+            <option value="${r.MaPhong}">
+                Phòng ${r.SoPhong} (${r.TenLoaiPhong}) - ${formatMoney(r.DonGiaTheoNgay)}/ngày
+            </option>
+        `).join('');
+
+        const modalEl = document.getElementById('modalBookingOnline');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    } catch (err) {
+        Swal.fire('Lỗi', err.message, 'error');
+    }
+}
+
+async function submitOnlineBooking(e) {
+    e.preventDefault();
+    const name = document.getElementById('ob-name').value.trim();
+    const phone = document.getElementById('ob-phone').value.trim();
+    const cccd = document.getElementById('ob-cccd').value.trim();
+    const dob = document.getElementById('ob-dob').value;
+    const maPhong = document.getElementById('ob-room').value;
+    const rentType = document.getElementById('ob-rent-type').value;
+    const notes = document.getElementById('ob-notes').value.trim();
+
+    try {
+        // 1. Tìm hoặc tạo khách hàng
+        let cust = null;
+        try {
+            const existing = await CustomerAPI.getAll(cccd);
+            if (existing && existing.length) cust = existing[0];
+        } catch (_) {}
+
+        if (!cust) {
+            cust = await CustomerAPI.create({
+                HoTen: name,
+                NgaySinh: dob,
+                CCCD: cccd,
+                SDT: phone,
+                DiaChi: 'Đặt trực tuyến'
+            });
+        }
+
+        // 2. Tạo phiếu thuê
+        const res = await RentalAPI.create({
+            MaKH: cust.MaKH,
+            MaPhong: maPhong,
+            HinhThucThue: rentType,
+            SoNguoiDuKien: 2,
+            GhiChu: notes
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('modalBookingOnline')).hide();
+        Swal.fire({
+            icon: 'success',
+            title: 'Đặt Phòng Thành Công!',
+            html: `
+                <div class="text-start">
+                    <p>Cảm ơn quý khách <strong>${name}</strong>!</p>
+                    <p>Mã phiếu đặt của bạn là: <strong class="text-primary">${res.MaPhieuThue}</strong></p>
+                    <p>Phòng đã được giữ chỗ thành công trong hệ thống. Hẹn gặp lại quý khách!</p>
+                </div>
+            `
+        });
+        document.getElementById('formOnlineBooking').reset();
+    } catch (err) {
+        Swal.fire('Lỗi đặt phòng', err.message, 'error');
+    }
+}
+</script>
+
+</body>
+</html>
+

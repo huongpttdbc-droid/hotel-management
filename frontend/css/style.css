@@ -1,0 +1,222 @@
+/* frontend/css/style.css */
+:root {
+    --primary-color: #0284c7;
+    --sidebar-bg: #0f172a;
+    --sidebar-hover: #1e293b;
+    --sidebar-active: #38bdf8;
+    --bg-body: #f1f5f9;
+}
+
+body {
+    background-color: var(--bg-body);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+}
+
+.sidebar {
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    color: #f8fafc;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    z-index: 100;
+}
+
+.sidebar .brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #38bdf8;
+    padding: 20px;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar .nav-link {
+    color: #94a3b8;
+    padding: 13px 20px;
+    font-weight: 500;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sidebar .nav-link:hover {
+    color: #ffffff;
+    background: var(--sidebar-hover);
+    border-left-color: rgba(56, 189, 248, 0.5);
+}
+
+.sidebar .nav-link.active {
+    color: #ffffff;
+    background: var(--sidebar-hover);
+    border-left-color: var(--sidebar-active);
+    font-weight: 600;
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+.main-content {
+    padding: 25px 30px;
+}
+
+/* Header Top Bar */
+.top-bar {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 15px 24px;
+    margin-bottom: 25px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Stat Cards */
+.stat-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 5px solid transparent;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+}
+
+.stat-card.card-all { border-left-color: #64748b; }
+.stat-card.card-trong { border-left-color: #10b981; }
+.stat-card.card-thue { border-left-color: #ef4444; }
+.stat-card.card-don { border-left-color: #f59e0b; }
+.stat-card.card-bt { border-left-color: #6b7280; }
+
+/* Room Cards */
+.room-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.room-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.status-trong {
+    background: #ecfdf5;
+    border-top: 5px solid #10b981;
+}
+
+.status-thue {
+    background: #fef2f2;
+    border-top: 5px solid #ef4444;
+}
+
+.status-don {
+    background: #fffbeb;
+    border-top: 5px solid #f59e0b;
+}
+
+.status-bt {
+    background: #f3f4f6;
+    border-top: 5px solid #6b7280;
+}
+
+.floor-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #334155;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Tables */
+.table-custom {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.table-custom th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 16px;
+}
+
+.table-custom td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Modals */
+.modal-content {
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 18px 24px;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    border-top: 1px solid #f1f5f9;
+    padding: 16px 24px;
+}
+
+/* Guest Portal Booking */
+.hero-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    padding: 60px 0;
+    border-radius: 0 0 24px 24px;
+    margin-bottom: 40px;
+}
+
+.room-type-card {
+    border-radius: 14px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease;
+}
+
+.room-type-card:hover {
+    transform: translateY(-5px);
+}
+
+.room-type-img {
+    height: 220px;
+    object-fit: cover;
+    width: 100%;
+}
+

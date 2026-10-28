@@ -1,0 +1,40 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables, Secrets & Local Config
+.env
+.env.*
+*.env
+*.local
+secrets.*
+
+# Python Cache & Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3-journal
+*.log
+
+# Build, Zip & Temporary Files
+*.zip
+*.tar.gz
+*.bak
+*.tmp
+*.swp
+
+# PHP Legacy Project (Do not deploy)
+QuanLyKhachSan/
+
+# IDEs & Editors
+.vscode/
+.vs/
+.idea/
+
+# OS Specific
+Thumbs.db
+Desktop.ini
+.DS_Store
+
