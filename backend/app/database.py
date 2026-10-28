@@ -1,3 +1,5 @@
+import os
+import sys
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -7,8 +9,9 @@ logger = logging.getLogger("uvicorn.error")
 
 DATABASE_URL = settings.DATABASE_URL
 
-# Nếu chạy trên môi trường Cloud (Render) hoặc DATABASE_URL vẫn trỏ localhost mà không có SQL Server
-if settings.ENVIRONMENT == "production" and ("localhost" in DATABASE_URL or "127.0.0.1" in DATABASE_URL):
+# Tự động phát hiện môi trường Cloud (Render/Linux) hoặc khi không thể kết nối SQL Server localhost
+is_cloud = bool(os.getenv("RENDER") or os.getenv("PORT") or sys.platform != "win32" or settings.ENVIRONMENT == "production")
+if is_cloud and ("localhost" in DATABASE_URL or "SQLEXPRESS" in DATABASE_URL or "127.0.0.1" in DATABASE_URL):
     DATABASE_URL = "sqlite:///./hotel_fallback.db"
 
 # Cấu hình engine linh hoạt cho MSSQL, PostgreSQL hoặc SQLite
