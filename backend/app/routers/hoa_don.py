@@ -92,15 +92,22 @@ def build_rich_invoice_response(hd: HoaDon, pt: PhieuThue, db: Session) -> HoaDo
         used_services = db.query(DungDichVu).filter(DungDichVu.MaPhieuThue == pt.MaPhieuThue).all()
         for us in used_services:
             dv = db.query(DichVu).filter(DichVu.MaDichVu == us.MaDichVu).first()
-            dg = float(us.DonGiaApDung or (dv.DonGia if dv else 0))
-            sl = us.SoLuong or 1
+            try:
+                dg = float(us.DonGiaApDung if us.DonGiaApDung is not None else (dv.DonGia if dv else 0))
+            except (ValueError, TypeError):
+                dg = float(dv.DonGia if dv else 0)
+            try:
+                sl = int(us.SoLuong) if us.SoLuong is not None else 1
+            except (ValueError, TypeError):
+                sl = 1
+            thanh_tien = round(dg * sl)
             services_list.append(
                 ChiTietDichVuHoaDon(
                     TenDichVu=dv.TenDichVu if dv else us.MaDichVu,
                     DonViTinh=dv.DonViTinh if dv else "Lần",
                     DonGia=dg,
                     SoLuong=sl,
-                    ThanhTien=dg * sl
+                    ThanhTien=thanh_tien
                 )
             )
 
@@ -169,7 +176,15 @@ def generate_invoice(ma_pt: str, db: Session = Depends(get_db)):
     tien_dich_vu = 0.0
     used_services = db.query(DungDichVu).filter(DungDichVu.MaPhieuThue == ma_pt).all()
     for s in used_services:
-        tien_dich_vu += float(s.DonGiaApDung) * (s.SoLuong or 1)
+        try:
+            s_dg = float(s.DonGiaApDung or 0)
+        except (ValueError, TypeError):
+            s_dg = 0.0
+        try:
+            s_sl = int(s.SoLuong) if s.SoLuong is not None else 1
+        except (ValueError, TypeError):
+            s_sl = 1
+        tien_dich_vu += s_dg * s_sl
 
     # 4. Tính ưu đãi khách hàng
     kh = db.query(KhachHang).filter(KhachHang.MaKH == pt.MaKH).first()
@@ -235,7 +250,7 @@ def pay_invoice(ma_hd: str, db: Session = Depends(get_db)):
 
     # 2. Kiểm tra số tiền đã thu trong bảng ThanhToan
     res_da_thu = db.execute(text("""
-        SELECT ISNULL(SUM(CASE LoaiKhoan WHEN N'Hoàn tiền' THEN -SoTien ELSE SoTien END), 0)
+        SELECT COALESCE(SUM(CASE LoaiKhoan WHEN 'Hoàn tiền' THEN -SoTien ELSE SoTien END), 0)
         FROM ThanhToan WHERE MaPhieuThue = :pt
     """), {'pt': hd.MaPhieuThue}).scalar()
     da_thu = float(res_da_thu or 0)
