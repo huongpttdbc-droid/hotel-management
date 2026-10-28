@@ -3,6 +3,9 @@ venv/
 .venv/
 env/
 ENV/
+pyvenv.cfg
+pyodbc.*
+typing_extensions.py
 
 # Environment Variables, Secrets & Local Config
 .env
