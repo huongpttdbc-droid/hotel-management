@@ -244,20 +244,20 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold m-0">Danh Sách Hóa Đơn Khách Sạn</h5>
                 </div>
-                <div class="table-custom mb-4">
-                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
-                        <table class="table table-hover align-middle m-0" style="min-width: 1060px; width: 100%;">
+                <div class="table-custom mb-4 overflow-hidden">
+                    <div class="table-responsive" style="max-width: 100%;">
+                        <table id="table-invoices" class="table table-hover align-middle m-0 table-invoices-compact" style="width: 100%; table-layout: auto;">
                             <thead>
                                 <tr>
-                                    <th style="width: 110px; min-width: 105px;">Mã HĐ</th>
-                                    <th style="width: 110px; min-width: 105px;">Mã Phiếu Thuê</th>
-                                    <th style="width: 125px; min-width: 120px;">Ngày Lập</th>
-                                    <th style="width: 105px; min-width: 100px;">Tiền Phòng</th>
-                                    <th style="width: 100px; min-width: 95px;">Tiền Dịch Vụ</th>
-                                    <th style="width: 90px; min-width: 85px;">Ưu Đãi</th>
-                                    <th style="width: 130px; min-width: 125px;">Tổng Cộng (Gồm VAT)</th>
-                                    <th style="width: 120px; min-width: 115px;" class="text-center">Trạng Thái</th>
-                                    <th class="text-center" style="width: 210px; min-width: 200px; white-space: nowrap;">Thao Tác</th>
+                                    <th style="width: 90px;">Mã HĐ</th>
+                                    <th style="width: 90px;">Mã Phiếu</th>
+                                    <th style="width: 85px;" class="text-center">Ngày Lập</th>
+                                    <th class="text-end" style="width: 85px;">Tiền Phòng</th>
+                                    <th class="text-end" style="width: 80px;">Tiền DV</th>
+                                    <th class="text-end" style="width: 70px;">Ưu Đãi</th>
+                                    <th class="text-end" style="width: 100px;">Tổng Cộng</th>
+                                    <th style="width: 105px;" class="text-center">Trạng Thái</th>
+                                    <th class="text-center" style="width: 155px; white-space: nowrap;">Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody id="invoices-table-body">
@@ -1511,6 +1511,15 @@ async function checkOut(maPT) {
     }
 }
 
+function formatDateTimeCompact(dtStr) {
+    if (!dtStr) return '—';
+    const d = new Date(dtStr);
+    if (isNaN(d.getTime())) return dtStr;
+    const time = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    const date = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `<div style="line-height: 1.25;"><span class="fw-semibold text-dark">${time}</span><br><span class="text-muted" style="font-size: 11px;">${date}</span></div>`;
+}
+
 // 3. Quản lý Hóa đơn
 async function loadInvoices() {
     try {
@@ -1525,25 +1534,27 @@ async function loadInvoices() {
             const isPaid = h.TrangThai === 'Đã thanh toán';
             return `
                 <tr>
-                    <td class="fw-bold text-primary">${h.MaHD}</td>
-                    <td>${h.MaPhieuThue}</td>
-                    <td class="small">${formatDateTime(h.NgayLap)}</td>
-                    <td>${formatMoney(h.TienPhong)}</td>
-                    <td>${formatMoney(h.TienDichVu)}</td>
-                    <td class="text-success">${formatMoney(h.UuDai)}</td>
-                    <td class="fw-bold fs-6 text-dark">${formatMoney(h.TongTien)}</td>
-                    <td><span class="badge ${isPaid ? 'bg-success' : 'bg-danger'}">${h.TrangThai}</span></td>
+                    <td class="fw-bold text-primary font-monospace" style="white-space: nowrap; font-size: 12.5px;">${h.MaHD}</td>
+                    <td class="font-monospace text-muted" style="white-space: nowrap; font-size: 12.5px;">${h.MaPhieuThue}</td>
+                    <td class="text-center" style="white-space: nowrap;">${formatDateTimeCompact(h.NgayLap)}</td>
+                    <td class="text-end" style="white-space: nowrap;">${formatMoney(h.TienPhong)}</td>
+                    <td class="text-end" style="white-space: nowrap;">${formatMoney(h.TienDichVu)}</td>
+                    <td class="text-end text-success" style="white-space: nowrap;">${h.UuDai ? `-${formatMoney(h.UuDai)}` : '0 ₫'}</td>
+                    <td class="text-end fw-bold text-dark" style="white-space: nowrap;">${formatMoney(h.TongTien)}</td>
+                    <td class="text-center" style="white-space: nowrap;">
+                        <span class="badge ${isPaid ? 'bg-success' : 'bg-danger'} badge-status-compact">${h.TrangThai}</span>
+                    </td>
                     <td class="text-center align-middle" style="white-space: nowrap;">
-                        <div class="d-flex align-items-center justify-content-center" style="gap: 8px;">
-                            <button class="btn btn-sm btn-outline-primary action-btn-fixed" onclick="createInvoice('${h.MaPhieuThue}')" title="Xem & In Hóa Đơn">
+                        <div class="d-flex align-items-center justify-content-center" style="gap: 4px; white-space: nowrap;">
+                            <button class="btn btn-sm btn-outline-primary btn-inv-action" onclick="createInvoice('${h.MaPhieuThue}')" title="Xem & In Hóa Đơn">
                                 <i class="fa-solid fa-file-invoice me-1"></i>Xem HĐ
                             </button>
                             ${!isPaid ? `
-                                <button class="btn btn-sm btn-success action-btn-fixed" onclick="payInvoice('${h.MaHD}')" title="Xác nhận thu tiền">
+                                <button class="btn btn-sm btn-success btn-inv-action" onclick="payInvoice('${h.MaHD}')" title="Xác nhận thu tiền">
                                     <i class="fa-solid fa-credit-card me-1"></i>Thu tiền
                                 </button>
                             ` : `
-                                <span class="badge bg-success-subtle text-success border border-success-subtle action-btn-fixed" title="Hóa đơn đã hoàn tất thanh toán">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle btn-inv-action" title="Hóa đơn đã hoàn tất thanh toán">
                                     <i class="fa-solid fa-circle-check me-1"></i>Đã xong
                                 </span>
                             `}
