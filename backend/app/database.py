@@ -7,7 +7,14 @@ from backend.app.config import settings
 
 logger = logging.getLogger("uvicorn.error")
 
-DATABASE_URL = settings.DATABASE_URL
+DATABASE_URL = (
+    os.getenv("DATABASE_URL")
+    or os.getenv("SUPABASE_DB_URL")
+    or os.getenv("SUPABASE_DATABASE_URL")
+    or os.getenv("POSTGRES_URL")
+    or os.getenv("POSTGRESQL_URL")
+    or settings.DATABASE_URL
+).strip()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FALLBACK_DB_PATH = os.path.join(BASE_DIR, "hotel_fallback.db").replace("\\", "/")
@@ -17,6 +24,11 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
 elif DATABASE_URL.startswith("postgresql://") and "+psycopg2" not in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+# Nếu là Supabase mà chưa có tham số sslmode -> tự động bổ sung sslmode=require để đảm bảo bảo mật SSL
+if "supabase" in DATABASE_URL.lower() and "sslmode" not in DATABASE_URL.lower():
+    separator = "&" if "?" in DATABASE_URL else "?"
+    DATABASE_URL = f"{DATABASE_URL}{separator}sslmode=require"
 
 # Tự động phát hiện môi trường Cloud (Render/Linux) hoặc khi không thể kết nối SQL Server localhost
 is_cloud = bool(os.getenv("RENDER") or os.getenv("PORT") or sys.platform != "win32" or settings.ENVIRONMENT == "production")
@@ -36,21 +48,28 @@ if is_cloud and "mssql+pyodbc" in DATABASE_URL:
 
 # Cấu hình engine linh hoạt cho MSSQL, PostgreSQL hoặc SQLite
 connect_args = {}
+engine_kwargs = {
+    "pool_pre_ping": True,
+    "echo": False
+}
+
 if "sqlite" in DATABASE_URL:
     connect_args["check_same_thread"] = False
 elif "pyodbc" in DATABASE_URL:
     connect_args["timeout"] = 3
+    engine_kwargs["pool_recycle"] = 300
 elif "pymssql" in DATABASE_URL:
     connect_args["timeout"] = 5
     connect_args["charset"] = "utf8"
+    engine_kwargs["pool_recycle"] = 300
+elif "postgresql" in DATABASE_URL or "postgres" in DATABASE_URL:
+    connect_args["connect_timeout"] = 5
+    engine_kwargs["pool_recycle"] = 300
+
+engine_kwargs["connect_args"] = connect_args
 
 try:
-    engine = create_engine(
-        DATABASE_URL,
-        connect_args=connect_args,
-        pool_pre_ping=True,
-        echo=False
-    )
+    engine = create_engine(DATABASE_URL, **engine_kwargs)
     # Thử kết nối nhanh
     with engine.connect() as conn:
         logger.info(f"Kết nối cơ sở dữ liệu thành công: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else 'Local SQL Server'}")
