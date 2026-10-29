@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Quản Lý Khách Sạn - Hotel Admin</title>
+    <!-- Google Fonts (Plus Jakarta Sans & Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
@@ -12,88 +16,9 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <!-- Chart.js CDN for Revenue Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom CSS -->
+    <!-- Custom CSS (Dabang Clean Soft UI Theme) -->
     <link href="css/style.css" rel="stylesheet">
     <style>
-    /* Hospitality Luxury Report Styles */
-    .report-card {
-        border-radius: 1rem;
-        transition: all 0.25s ease;
-        background: #ffffff;
-        border: 1px solid rgba(226, 232, 240, 0.9);
-    }
-    .report-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-    }
-    .badge-gold {
-        background-color: #fef3c7;
-        color: #92400e;
-        border: 1px solid #fde68a;
-    }
-    .has-tooltip {
-        position: relative;
-        cursor: help;
-    }
-    .tooltip-box {
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        position: absolute;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 220px;
-        background: #0f172a;
-        color: #f8fafc;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 400;
-        line-height: 1.4;
-        z-index: 1000;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-    }
-    .has-tooltip:hover .tooltip-box {
-        visibility: visible;
-        opacity: 1;
-    }
-    .time-filter-btn {
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
-        color: #475569;
-        font-size: 0.8rem;
-        font-weight: 500;
-        padding: 6px 14px;
-        border-radius: 8px;
-        transition: all 0.2s;
-    }
-    .time-filter-btn:hover {
-        background: #e2e8f0;
-        color: #0f172a;
-    }
-    .time-filter-btn.active {
-        background: #1b3a5b;
-        color: #ffffff;
-        border-color: #1b3a5b;
-        box-shadow: 0 2px 4px rgba(27, 58, 91, 0.25);
-    }
-    /* Nút Thao Tác Cố Định & Cân Đối trong Bảng Hóa Đơn */
-    .action-btn-fixed {
-        width: 94px;
-        min-width: 94px;
-        height: 32px;
-        font-size: 0.8125rem;
-        padding: 0 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        font-weight: 500;
-        box-sizing: border-box;
-        white-space: nowrap;
-        text-decoration: none;
-    }
     @media print {
         body * {
             visibility: hidden !important;
@@ -124,10 +49,12 @@
         <!-- SIDEBAR -->
         <div class="col-md-3 col-lg-2 px-0 sidebar d-none d-md-block">
             <div class="brand">
-                <i class="fa-solid fa-hotel text-info"></i>
+                <div class="brand-icon-box">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
                 <div class="d-inline-block text-start">
-                    <span class="d-block lh-1">HOTEL ADMIN</span>
-                    <span id="brand-subtitle" class="badge bg-secondary mt-1 fw-normal" style="font-size: 0.68rem; letter-spacing: 0.5px;">BÀN LỄ TÂN</span>
+                    <span class="brand-title">HOTEL ADMIN</span>
+                    <span id="brand-subtitle" class="brand-badge">BÀN LỄ TÂN</span>
                 </div>
             </div>
             <div class="nav flex-column mt-3">
@@ -152,8 +79,8 @@
                 <a class="nav-link d-none" id="nav-staff" onclick="switchSection('staff')">
                     <i class="fa-solid fa-user-shield"></i> Quản Trị Nhân Sự
                 </a>
-                <hr class="border-secondary mx-3 my-2">
-                <a href="booking.html" class="nav-link text-warning" target="_blank">
+                <hr class="border-light-subtle mx-3 my-2">
+                <a href="booking.html" class="nav-link" style="color: #FF8F0D !important;" target="_blank">
                     <i class="fa-solid fa-globe"></i> Trang Khách Đặt Phòng
                 </a>
                 <!-- Swagger API Docs (Ẩn khỏi Sidebar UI; Dev/Quản trị viên truy cập trực tiếp qua URL /docs)
@@ -169,14 +96,14 @@
             <!-- TOP BAR -->
             <div class="top-bar">
                 <div>
-                    <h4 class="m-0 fw-bold text-dark" id="page-title">Sơ Đồ Phòng</h4>
-                    <span class="text-muted small" id="page-subtitle"><i class="fa-solid fa-bell-concierge text-primary me-1"></i>Nghiệp Vụ Lễ Tân & Bán Phòng</span>
+                    <h4 class="m-0 fw-bold" id="page-title" style="color: #05004E;">Sơ Đồ Phòng</h4>
+                    <span id="page-subtitle" style="color: #737791; font-size: 0.85rem;"><i class="fa-solid fa-bell-concierge me-1" style="color: #5D5FEF;"></i>Nghiệp Vụ Lễ Tân & Bán Phòng</span>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm" id="top-user-badge">
-                        <i id="top-user-icon" class="fa-solid fa-bell-concierge me-1"></i> <span id="top-user-role">Lễ Tân</span>: <span id="top-user-name">Đang tải...</span> (<span id="top-user-id">NV01</span>)
-                    </span>
-                    <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+                    <div class="user-badge-soft" id="top-user-badge">
+                        <i id="top-user-icon" class="fa-solid fa-bell-concierge me-2"></i> <span id="top-user-role">Lễ Tân</span>: <span id="top-user-name" class="ms-1 fw-bold">Đang tải...</span> (<span id="top-user-id">NV01</span>)
+                    </div>
+                    <button class="btn btn-logout-soft" onclick="logout()">
                         <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất
                     </button>
                 </div>
@@ -184,30 +111,65 @@
 
             <!-- SECTION 1: SƠ ĐỒ PHÒNG (DASHBOARD) -->
             <div id="section-dashboard" class="content-section">
-                <!-- KPI CARDS -->
-                <div class="row g-3 mb-4">
-                    <div class="col-6 col-xl-3">
-                        <div class="stat-card card-all" onclick="filterRooms('all')">
-                            <div class="text-muted small fw-semibold">Tổng số phòng</div>
-                            <div class="fs-2 fw-bold text-dark" id="kpi-total-rooms">30</div>
+                <!-- KHU VỰC 4 THẺ THỐNG KÊ NHANH (SUMMARY KPI CARDS - DABANG SOFT UI) -->
+                <div class="kpi-container-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="fw-bold m-0" style="color: #05004E; font-size: 1.15rem;">Tổng Quan Vận Hành</h5>
+                            <span class="small" style="color: #737791;">Tình trạng buồng phòng & công suất thời gian thực</span>
                         </div>
+                        <span class="badge" style="background: #F4F7FE; color: #5D5FEF; font-weight: 600; padding: 8px 14px; border-radius: 10px; font-size: 0.8rem;">
+                            <i class="fa-solid fa-hotel me-1"></i> Grand Horizon Hotel
+                        </span>
                     </div>
-                    <div class="col-6 col-xl-3">
-                        <div class="stat-card card-trong" onclick="filterRooms('Trống')">
-                            <div class="text-muted small fw-semibold">Phòng trống</div>
-                            <div class="fs-2 fw-bold text-success" id="kpi-empty-rooms">0</div>
+
+                    <div class="row g-3">
+                        <!-- Thẻ 1: Tổng số phòng (Hồng phấn #FFE2E5, icon tròn #FA5A7D) -->
+                        <div class="col-6 col-xl-3">
+                            <div class="kpi-card kpi-pink stat-card card-all" onclick="filterRooms('all')">
+                                <div class="kpi-icon-circle">
+                                    <i class="fa-solid fa-layer-group text-white"></i>
+                                </div>
+                                <div class="kpi-value" id="kpi-total-rooms">30</div>
+                                <div class="kpi-title">Tổng số phòng</div>
+                                <div class="kpi-note">Toàn bộ khách sạn</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-6 col-xl-3">
-                        <div class="stat-card card-thue" onclick="filterRooms('Đang thuê')">
-                            <div class="text-muted small fw-semibold">Đang có khách</div>
-                            <div class="fs-2 fw-bold text-danger" id="kpi-rented-rooms">0</div>
+
+                        <!-- Thẻ 2: Phòng trống (Vàng kem #FFF4DE, icon tròn #FF947A) -->
+                        <div class="col-6 col-xl-3">
+                            <div class="kpi-card kpi-yellow stat-card card-trong" onclick="filterRooms('Trống')">
+                                <div class="kpi-icon-circle">
+                                    <i class="fa-solid fa-door-open text-white"></i>
+                                </div>
+                                <div class="kpi-value" id="kpi-empty-rooms">0</div>
+                                <div class="kpi-title">Phòng trống</div>
+                                <div class="kpi-note">Sẵn sàng đón khách</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-6 col-xl-3">
-                        <div class="stat-card card-don" onclick="filterRooms('Đang dọn')">
-                            <div class="text-muted small fw-semibold">Đang dọn / Bảo trì</div>
-                            <div class="fs-2 fw-bold text-warning" id="kpi-cleaning-rooms">0</div>
+
+                        <!-- Thẻ 3: Đang có khách (Xanh mint #DCFCE7, icon tròn #3CD856) -->
+                        <div class="col-6 col-xl-3">
+                            <div class="kpi-card kpi-green stat-card card-thue" onclick="filterRooms('Đang thuê')">
+                                <div class="kpi-icon-circle">
+                                    <i class="fa-solid fa-bed text-white"></i>
+                                </div>
+                                <div class="kpi-value" id="kpi-rented-rooms">0</div>
+                                <div class="kpi-title">Đang có khách</div>
+                                <div class="kpi-note">Đang lưu trú</div>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ 4: Đang dọn / Bảo trì (Tím lavender #F3E8FF, icon tròn #BF83FF) -->
+                        <div class="col-6 col-xl-3">
+                            <div class="kpi-card kpi-purple stat-card card-don" onclick="filterRooms('Đang dọn')">
+                                <div class="kpi-icon-circle">
+                                    <i class="fa-solid fa-broom text-white"></i>
+                                </div>
+                                <div class="kpi-value" id="kpi-cleaning-rooms">0</div>
+                                <div class="kpi-title">Đang dọn / Bảo trì</div>
+                                <div class="kpi-note">Chờ xử lý buồng</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1117,13 +1079,15 @@ function initCurrentUser() {
 
         if (isManager) {
             // Giao diện Quản Lý
-            if (badgeEl) badgeEl.className = 'badge bg-danger px-3 py-2 fs-6 shadow-sm';
-            if (roleIcon) roleIcon.className = 'fa-solid fa-user-shield me-1';
+            if (badgeEl) badgeEl.className = 'user-badge-soft';
+            if (roleIcon) roleIcon.className = 'fa-solid fa-user-shield me-2';
             if (roleSpan) roleSpan.innerText = 'Quản Lý';
             if (subtitleEl) subtitleEl.innerHTML = '<i class="fa-solid fa-shield-halved text-danger me-1"></i>Hệ thống Quản Trị Khách Sạn (Giao diện Quản Lý)';
             if (brandSubtitleEl) {
                 brandSubtitleEl.innerText = 'BAN QUẢN LÝ';
-                brandSubtitleEl.className = 'badge bg-danger mt-1 fw-normal';
+                brandSubtitleEl.className = 'brand-badge';
+                brandSubtitleEl.style.background = '#FFE2E5';
+                brandSubtitleEl.style.color = '#FA5A7D';
             }
 
             // Hiển thị các menu đặc quyền
@@ -1131,13 +1095,15 @@ function initCurrentUser() {
             if (navStaff) navStaff.classList.remove('d-none');
         } else {
             // Giao diện Lễ Tân
-            if (badgeEl) badgeEl.className = 'badge bg-primary px-3 py-2 fs-6 shadow-sm';
-            if (roleIcon) roleIcon.className = 'fa-solid fa-bell-concierge me-1';
+            if (badgeEl) badgeEl.className = 'user-badge-soft';
+            if (roleIcon) roleIcon.className = 'fa-solid fa-bell-concierge me-2';
             if (roleSpan) roleSpan.innerText = currentUser.chuc_vu || 'Lễ Tân';
             if (subtitleEl) subtitleEl.innerHTML = '<i class="fa-solid fa-bell-concierge text-primary me-1"></i>Nghiệp Vụ Lễ Tân & Bán Phòng';
             if (brandSubtitleEl) {
                 brandSubtitleEl.innerText = 'BÀN LỄ TÂN';
-                brandSubtitleEl.className = 'badge bg-primary mt-1 fw-normal';
+                brandSubtitleEl.className = 'brand-badge';
+                brandSubtitleEl.style.background = '#F4F7FE';
+                brandSubtitleEl.style.color = '#5D5FEF';
             }
 
             // Ẩn các menu quản lý
@@ -2059,10 +2025,10 @@ function renderRevenueCharts(data) {
                     {
                         label: 'Doanh thu (Triệu VNĐ)',
                         data: dienBien.revenue || [],
-                        backgroundColor: 'rgba(59, 130, 246, 0.75)',
-                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(0, 149, 255, 0.75)',
+                        borderColor: '#0095FF',
                         borderWidth: 1,
-                        borderRadius: 6,
+                        borderRadius: 8,
                         yAxisID: 'yRevenue',
                         order: 3
                     },
@@ -2070,11 +2036,11 @@ function renderRevenueCharts(data) {
                         label: 'Công suất phòng (%)',
                         data: dienBien.occ || [],
                         type: 'line',
-                        borderColor: '#f59e0b',
-                        backgroundColor: '#f59e0b',
+                        borderColor: '#FF8F0D',
+                        backgroundColor: '#FF8F0D',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBackgroundColor: '#f59e0b',
+                        pointBackgroundColor: '#FF8F0D',
                         tension: 0.3,
                         yAxisID: 'yOcc',
                         order: 1
@@ -2083,8 +2049,8 @@ function renderRevenueCharts(data) {
                         label: 'ADR (Nghìn VNĐ)',
                         data: dienBien.adr || [],
                         type: 'line',
-                        borderColor: '#10b981',
-                        backgroundColor: '#10b981',
+                        borderColor: '#00E096',
+                        backgroundColor: '#00E096',
                         borderWidth: 2,
                         borderDash: [4, 4],
                         pointRadius: 3,
@@ -2171,7 +2137,7 @@ function renderRevenueCharts(data) {
                 labels: ['Tiền phòng (Room)', 'Ẩm thực & Dịch vụ (F&B)', 'Thuế VAT & Phụ thu'],
                 datasets: [{
                     data: [coCau.tien_phong || 0, coCau.dich_vu || 0, coCau.vat_va_phu_thu || 0],
-                    backgroundColor: ['#2563eb', '#f59e0b', '#10b981'],
+                    backgroundColor: ['#0095FF', '#FFCF00', '#00E096'],
                     borderWidth: 2,
                     borderColor: '#ffffff',
                     hoverOffset: 6

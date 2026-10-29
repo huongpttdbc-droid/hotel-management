@@ -1,147 +1,565 @@
-/* frontend/css/style.css */
+/* frontend/css/style.css - Dabang Clean Soft UI Dashboard Theme */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+
 :root {
-    --primary-color: #0284c7;
-    --sidebar-bg: #0f172a;
-    --sidebar-hover: #1e293b;
-    --sidebar-active: #38bdf8;
-    --bg-body: #f1f5f9;
+    /* Dabang Brand & Primary Colors */
+    --primary-color: #5D5FEF;
+    --primary-hover: #4B4DDF;
+    --primary-soft: rgba(93, 95, 239, 0.1);
+    --primary-shadow: rgba(93, 95, 239, 0.25);
+
+    /* Backgrounds & Surfaces */
+    --bg-body: #F4F7FE;
+    --bg-card: #FFFFFF;
+    --border-soft: #F1F3F9;
+    --border-subtle: #E8EEFB;
+    --card-radius: 20px;
+    --card-shadow: 0px 4px 20px rgba(238, 238, 238, 0.5);
+    --soft-shadow: 0 10px 30px rgba(82, 63, 105, 0.04);
+
+    /* Typography Colors */
+    --text-heading: #05004E;
+    --text-title: #151D48;
+    --text-body: #737791;
+    --text-muted: #8E92BC;
+    --text-sub: #425166;
+    --text-accent: #4079ED;
+
+    /* Dabang Soft Accents & Status Colors */
+    --accent-blue: #0095FF;
+    --accent-green: #00E096;
+    --accent-yellow: #FFCF00;
+    --accent-orange: #FF8F0D;
+
+    /* KPI Card Pastels */
+    --kpi-pink-bg: #FFE2E5;
+    --kpi-pink-circle: #FA5A7D;
+    --kpi-yellow-bg: #FFF4DE;
+    --kpi-yellow-circle: #FF947A;
+    --kpi-green-bg: #DCFCE7;
+    --kpi-green-circle: #3CD856;
+    --kpi-purple-bg: #F3E8FF;
+    --kpi-purple-circle: #BF83FF;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
     background-color: var(--bg-body);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    color: #1e293b;
+    font-family: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-title);
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
 }
 
+/* ==========================================================================
+   1. SIDEBAR (Menu điều hướng bên trái)
+   ========================================================================== */
 .sidebar {
     height: 100vh;
     position: sticky;
     top: 0;
     overflow-y: auto;
-    background: var(--sidebar-bg);
-    color: #f8fafc;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    background: #FFFFFF;
+    color: var(--text-body);
+    border-right: 1px solid var(--border-soft);
+    box-shadow: 0px 4px 20px rgba(238, 238, 238, 0.5);
     z-index: 100;
+    padding-bottom: 24px;
 }
 
 .sidebar .brand {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #38bdf8;
-    padding: 20px;
-    border-bottom: 1px solid #334155;
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border-soft);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+}
+
+.sidebar .brand-icon-box {
+    width: 44px;
+    height: 44px;
+    background: #5D5FEF;
+    color: #FFFFFF;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: 0px 8px 16px rgba(93, 95, 239, 0.25);
+    flex-shrink: 0;
+}
+
+.sidebar .brand-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #151D48;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+    display: block;
+}
+
+.sidebar .brand-badge {
+    background: #F4F7FE;
+    color: #5D5FEF;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 3px;
+    letter-spacing: 0.5px;
 }
 
 .sidebar .nav-link {
-    color: #94a3b8;
-    padding: 13px 20px;
+    color: #737791 !important;
+    padding: 12px 18px;
+    margin: 4px 14px;
     font-weight: 500;
-    border-left: 4px solid transparent;
+    font-size: 0.95rem;
+    border-radius: 14px;
+    border: none !important;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 12px;
     text-decoration: none;
     cursor: pointer;
-}
-
-.sidebar .nav-link:hover {
-    color: #ffffff;
-    background: var(--sidebar-hover);
-    border-left-color: rgba(56, 189, 248, 0.5);
-}
-
-.sidebar .nav-link.active {
-    color: #ffffff;
-    background: var(--sidebar-hover);
-    border-left-color: var(--sidebar-active);
-    font-weight: 600;
+    background: transparent;
 }
 
 .sidebar .nav-link i {
-    width: 20px;
+    width: 22px;
+    font-size: 1.1rem;
     text-align: center;
+    color: inherit;
+    transition: all 0.2s ease;
 }
 
+.sidebar .nav-link:hover {
+    color: #151D48 !important;
+    background: #F4F5F9 !important;
+    font-weight: 600;
+}
+
+.sidebar .nav-link.active {
+    color: #FFFFFF !important;
+    background: #5D5FEF !important;
+    font-weight: 600;
+    border-radius: 14px;
+    box-shadow: 0px 10px 20px rgba(93, 95, 239, 0.25);
+}
+
+.sidebar .nav-link.active i {
+    color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   2. TOP HEADER & MAIN CONTENT
+   ========================================================================== */
 .main-content {
-    padding: 25px 30px;
+    padding: 24px 30px;
+    background: var(--bg-body);
+    min-height: 100vh;
 }
 
-/* Header Top Bar */
 .top-bar {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 15px 24px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 16px 28px;
     margin-bottom: 25px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 10px 30px rgba(82, 63, 105, 0.04);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Stat Cards */
-.stat-card {
-    background: #ffffff;
+.top-bar h4 {
+    color: #05004E;
+    font-weight: 700;
+    font-size: 1.35rem;
+    margin: 0;
+}
+
+.top-bar #page-subtitle {
+    color: #737791;
+    font-size: 0.85rem;
+}
+
+/* User Badge in Top Bar */
+.user-badge-soft {
+    background: #F4F7FE;
+    color: #151D48;
+    border: 1px solid #E8EEFB;
     border-radius: 12px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.user-badge-soft i {
+    color: #5D5FEF;
+}
+
+/* ==========================================================================
+   3. CARDS & SURFACES (Dabang Clean Soft UI)
+   ========================================================================== */
+.card {
+    background: #FFFFFF;
+    border-radius: var(--card-radius) !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: var(--card-shadow) !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* ==========================================================================
+   4. SUMMARY KPI CARDS (Dabang 4 Pastels Block)
+   ========================================================================== */
+.kpi-container-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 5px solid transparent;
     cursor: pointer;
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-}
-
-.stat-card.card-all { border-left-color: #64748b; }
-.stat-card.card-trong { border-left-color: #10b981; }
-.stat-card.card-thue { border-left-color: #ef4444; }
-.stat-card.card-don { border-left-color: #f59e0b; }
-.stat-card.card-bt { border-left-color: #6b7280; }
-
-/* Room Cards */
-.room-card {
-    border-radius: 12px;
     border: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.kpi-icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Thẻ 1: Hồng phấn #FFE2E5, circle #FA5A7D */
+.kpi-card.kpi-pink {
+    background: #FFE2E5;
+}
+.kpi-card.kpi-pink .kpi-icon-circle {
+    background: #FA5A7D;
+    color: #FFFFFF;
+}
+
+/* Thẻ 2: Vàng kem #FFF4DE, circle #FF947A */
+.kpi-card.kpi-yellow {
+    background: #FFF4DE;
+}
+.kpi-card.kpi-yellow .kpi-icon-circle {
+    background: #FF947A;
+    color: #FFFFFF;
+}
+
+/* Thẻ 3: Xanh mint #DCFCE7, circle #3CD856 */
+.kpi-card.kpi-green {
+    background: #DCFCE7;
+}
+.kpi-card.kpi-green .kpi-icon-circle {
+    background: #3CD856;
+    color: #FFFFFF;
+}
+
+/* Thẻ 4: Tím lavender #F3E8FF, circle #BF83FF */
+.kpi-card.kpi-purple {
+    background: #F3E8FF;
+}
+.kpi-card.kpi-purple .kpi-icon-circle {
+    background: #BF83FF;
+    color: #FFFFFF;
+}
+
+.kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #151D48;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.kpi-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #425166;
+    margin-bottom: 6px;
+}
+
+.kpi-note {
+    font-size: 12px;
+    font-weight: 500;
+    color: #4079ED;
+    margin-top: auto;
+}
+
+/* Tương thích ngược với các class cũ */
+.stat-card {
+    border: none !important;
+}
+
+/* ==========================================================================
+   5. TABLES (Clean Soft Modern Table)
+   ========================================================================== */
+.table-custom {
+    background: #FFFFFF;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--card-shadow);
+}
+
+.table {
+    margin-bottom: 0;
+    color: var(--text-body);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    background: #FAFBFC !important;
+    color: #425166 !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    border-bottom: 1px solid var(--border-soft) !important;
+    padding: 16px 18px !important;
+    white-space: nowrap;
+    text-transform: none;
+}
+
+.table td {
+    padding: 16px 18px !important;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-soft) !important;
+    color: #737791 !important;
+    font-size: 0.9rem;
+}
+
+.table tbody tr:hover td {
+    background-color: #F8FAFD !important;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* ==========================================================================
+   6. BUTTONS & CONTROLS (Dabang Color Palette)
+   ========================================================================== */
+/* Nút chính (Primary): Tím xanh #5D5FEF */
+.btn-primary {
+    background-color: #5D5FEF !important;
+    border-color: #5D5FEF !important;
+    color: #FFFFFF !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 8px 18px !important;
+    box-shadow: 0px 6px 14px rgba(93, 95, 239, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #4B4DDF !important;
+    border-color: #4B4DDF !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0px 8px 18px rgba(93, 95, 239, 0.3) !important;
+}
+
+/* Nút phụ (như nút Export / Lọc / Outline): Nền trắng, viền #C3D3E2, chữ #0F3659 */
+.btn-outline-secondary, .filter-btn, .time-filter-btn {
+    background: #FFFFFF !important;
+    border: 1px solid #C3D3E2 !important;
+    color: #0F3659 !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    padding: 6px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-outline-secondary:hover, .filter-btn:hover, .time-filter-btn:hover {
+    background: #F4F7FE !important;
+    border-color: #5D5FEF !important;
+    color: #5D5FEF !important;
+}
+
+/* Nút lọc đang kích hoạt */
+.filter-btn.active, .time-filter-btn.active {
+    background: #5D5FEF !important;
+    border-color: #5D5FEF !important;
+    color: #FFFFFF !important;
+    box-shadow: 0px 6px 14px rgba(93, 95, 239, 0.25) !important;
+}
+
+/* Nút Thu tiền / Success */
+.btn-success {
+    background-color: #00E096 !important;
+    border-color: #00E096 !important;
+    color: #FFFFFF !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    box-shadow: 0px 6px 14px rgba(0, 224, 150, 0.2) !important;
+}
+
+.btn-success:hover {
+    background-color: #00B67A !important;
+    border-color: #00B67A !important;
+}
+
+/* Nút Cố Định & Cân Đối trong Bảng Hóa Đơn (Xem HĐ / Thu tiền / Đã xong) */
+.action-btn-fixed {
+    width: 94px !important;
+    min-width: 94px !important;
+    height: 32px !important;
+    font-size: 0.8125rem !important;
+    padding: 0 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+}
+
+/* Nút Outline Primary */
+.btn-outline-primary {
+    color: #5D5FEF !important;
+    border: 1px solid rgba(93, 95, 239, 0.4) !important;
+    background: #FFFFFF !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+.btn-outline-primary:hover {
+    background: #5D5FEF !important;
+    border-color: #5D5FEF !important;
+    color: #FFFFFF !important;
+}
+
+/* Nút Đăng xuất Soft */
+.btn-logout-soft {
+    background: #FFE2E5;
+    color: #FA5A7D;
+    border: none;
+    border-radius: 10px;
+    padding: 7px 16px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.btn-logout-soft:hover {
+    background: #FA5A7D;
+    color: #FFFFFF;
+}
+
+/* ==========================================================================
+   7. BADGES & STATUS PILLS (Soft Accents)
+   ========================================================================== */
+.badge {
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.2px;
+}
+
+.badge.bg-success, .badge.bg-success-subtle {
+    background-color: #DCFCE7 !important;
+    color: #00B67A !important;
+    border: 1px solid rgba(0, 182, 122, 0.2) !important;
+}
+
+.badge.bg-danger, .badge.bg-danger-subtle {
+    background-color: #FFE2E5 !important;
+    color: #FA5A7D !important;
+    border: 1px solid rgba(250, 90, 125, 0.2) !important;
+}
+
+.badge.bg-warning, .badge.bg-warning-subtle {
+    background-color: #FFF4DE !important;
+    color: #FF8F0D !important;
+    border: 1px solid rgba(255, 143, 13, 0.2) !important;
+}
+
+.badge.bg-info, .badge.bg-info-subtle {
+    background-color: #E0F2FE !important;
+    color: #0095FF !important;
+    border: 1px solid rgba(0, 149, 255, 0.2) !important;
+}
+
+.badge.bg-secondary, .badge.bg-secondary-subtle {
+    background-color: #F3E8FF !important;
+    color: #BF83FF !important;
+    border: 1px solid rgba(191, 131, 255, 0.2) !important;
+}
+
+/* ==========================================================================
+   8. ROOM CARDS (Sơ Đồ Phòng Soft Clean)
+   ========================================================================== */
+.room-card {
+    border-radius: 18px !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: 0px 4px 16px rgba(238, 238, 238, 0.5) !important;
+    background: #FFFFFF !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     overflow: hidden;
 }
 
 .room-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 24px rgba(82, 63, 105, 0.08) !important;
 }
 
 .status-trong {
-    background: #ecfdf5;
-    border-top: 5px solid #10b981;
+    background: linear-gradient(180deg, #FFFFFF 65%, #F0FDF4 100%) !important;
+    border-top: 4px solid #3CD856 !important;
 }
 
 .status-thue {
-    background: #fef2f2;
-    border-top: 5px solid #ef4444;
+    background: linear-gradient(180deg, #FFFFFF 65%, #FFF1F2 100%) !important;
+    border-top: 4px solid #FA5A7D !important;
 }
 
 .status-don {
-    background: #fffbeb;
-    border-top: 5px solid #f59e0b;
+    background: linear-gradient(180deg, #FFFFFF 65%, #FFFBEB 100%) !important;
+    border-top: 4px solid #FF947A !important;
 }
 
 .status-bt {
-    background: #f3f4f6;
-    border-top: 5px solid #6b7280;
+    background: linear-gradient(180deg, #FFFFFF 65%, #FAF5FF 100%) !important;
+    border-top: 4px solid #BF83FF !important;
 }
 
 .floor-title {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #334155;
+    color: #05004E;
     margin-top: 25px;
     margin-bottom: 15px;
     display: flex;
@@ -149,74 +567,94 @@ body {
     gap: 8px;
 }
 
-/* Tables */
-.table-custom {
-    background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+/* ==========================================================================
+   9. REPORT SECTION (Hospitality Intelligence Soft Cards)
+   ========================================================================== */
+.report-card {
+    border-radius: 20px !important;
+    background: #FFFFFF !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: var(--card-shadow) !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease !important;
 }
 
-.table-custom th {
-    background: #f8fafc;
-    color: #475569;
-    font-weight: 600;
-    font-size: 0.875rem;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 14px 16px;
+.report-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 25px -5px rgba(82, 63, 105, 0.08) !important;
 }
 
-.table-custom td {
-    padding: 14px 16px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f1f5f9;
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 10px !important;
+    border: 1px solid #E2E8F0 !important;
+    color: #151D48 !important;
+    font-size: 0.9rem !important;
+    padding: 9px 14px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #5D5FEF !important;
+    box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.15) !important;
+    outline: none !important;
+}
+
+/* Tooltip Subtle */
+.has-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip-box {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    background: #151D48;
+    color: #FFFFFF;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+    z-index: 1000;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.has-tooltip:hover .tooltip-box {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Modals */
 .modal-content {
-    border-radius: 14px;
-    border: none;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-radius: 20px !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: 0 25px 50px -12px rgba(82, 63, 105, 0.25) !important;
+    overflow: hidden;
 }
 
 .modal-header {
-    border-bottom: 1px solid #f1f5f9;
-    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-soft) !important;
+    padding: 20px 26px !important;
+    background: #FFFFFF !important;
+}
+
+.modal-header .modal-title {
+    color: #05004E !important;
+    font-weight: 700 !important;
 }
 
 .modal-body {
-    padding: 24px;
+    padding: 26px !important;
 }
 
 .modal-footer {
-    border-top: 1px solid #f1f5f9;
-    padding: 16px 24px;
+    border-top: 1px solid var(--border-soft) !important;
+    padding: 18px 26px !important;
+    background: #FAFBFC !important;
 }
-
-/* Guest Portal Booking */
-.hero-banner {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #ffffff;
-    padding: 60px 0;
-    border-radius: 0 0 24px 24px;
-    margin-bottom: 40px;
-}
-
-.room-type-card {
-    border-radius: 14px;
-    overflow: hidden;
-    border: none;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    transition: transform 0.25s ease;
-}
-
-.room-type-card:hover {
-    transform: translateY(-5px);
-}
-
-.room-type-img {
-    height: 220px;
-    object-fit: cover;
-    width: 100%;
-}
-
