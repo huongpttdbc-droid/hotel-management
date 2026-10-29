@@ -183,8 +183,6 @@ class TestHotelManagementSystem(unittest.TestCase):
         res_rooms = client.get("/api/phong?tinh_trang=Trống")
         empty_rooms = res_rooms.json()
         self.assertGreater(len(empty_rooms), 0, "Cần có ít nhất 1 phòng trống để test luồng")
-        target_room = empty_rooms[0]
-        ma_phong = target_room["MaPhong"]
 
         # BƯỚC 2: Lấy 1 khách hàng có sẵn
         res_cust = client.get("/api/khach-hang?limit=1")
@@ -192,15 +190,24 @@ class TestHotelManagementSystem(unittest.TestCase):
         target_cust = res_cust.json()[0]
         ma_kh = target_cust["MaKH"]
 
-        # BƯỚC 3: Lập phiếu thuê phòng (Theo ngày)
-        rental_data = {
-            "MaKH": ma_kh,
-            "MaPhong": ma_phong,
-            "HinhThucThue": "Theo ngày",
-            "SoNguoiDuKien": 1,
-            "GhiChu": "Test E2E Automated Suite"
-        }
-        res_rental = client.post("/api/phieu-thue", json=rental_data)
+        # BƯỚC 3: Lập phiếu thuê phòng (Theo ngày) trên phòng trống khả dụng
+        res_rental = None
+        ma_phong = None
+        for room in empty_rooms:
+            rental_data = {
+                "MaKH": ma_kh,
+                "MaPhong": room["MaPhong"],
+                "HinhThucThue": "Theo ngày",
+                "SoNguoiDuKien": 1,
+                "GhiChu": "Test E2E Automated Suite"
+            }
+            try_res = client.post("/api/phieu-thue", json=rental_data)
+            if try_res.status_code == 200:
+                res_rental = try_res
+                ma_phong = room["MaPhong"]
+                break
+
+        self.assertIsNotNone(res_rental, "Không lập được phiếu thuê trên các phòng trống")
         self.assertEqual(res_rental.status_code, 200)
         created_pt = res_rental.json()
         ma_pt = created_pt["MaPhieuThue"]

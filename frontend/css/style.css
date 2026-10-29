@@ -327,9 +327,15 @@ body {
 .table-custom {
     background: #FFFFFF;
     border-radius: 20px;
-    overflow: hidden;
     border: 1px solid var(--border-soft);
     box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+.table-responsive {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    -webkit-overflow-scrolling: touch;
 }
 
 .table {
@@ -340,15 +346,15 @@ body {
     width: 100%;
 }
 
-/* Tiêu đề cột (Table Headers) Nổi bật, Rõ ràng, Tương phản cao chuẩn Dabang Dashboard */
+/* Tiêu đề cột (Table Headers - <th>): Nổi bật, Rõ ràng, Tối màu, Tương phản cao chuẩn Dabang Dashboard */
 .table thead th,
 .table th,
 .table-light th,
 thead.table-light th,
 .table thead.table-light th {
     background-color: #EEF2F6 !important;
-    color: #151D48 !important;
-    font-weight: 700 !important;
+    color: #0F172A !important; /* Màu tối đậm độ tương phản cao (#0F172A) */
+    font-weight: 600 !important; /* Đậm nét chuẩn font-weight: 600 */
     font-size: 0.8125rem !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
@@ -361,7 +367,7 @@ thead.table-light th,
 
 thead.text-muted th,
 .table thead.text-muted th {
-    color: #151D48 !important;
+    color: #0F172A !important;
 }
 
 .table td {
@@ -445,11 +451,10 @@ thead.text-muted th,
 
 /* Nút Cố Định & Cân Đối trong Bảng Hóa Đơn & Bảng Thuê Phòng */
 .action-btn-fixed {
-    width: 80px !important;
-    min-width: 80px !important;
-    height: 30px !important;
-    font-size: 0.78rem !important;
-    padding: 0 4px !important;
+    min-width: 86px !important;
+    height: 32px !important;
+    font-size: 0.8125rem !important;
+    padding: 4px 10px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -458,7 +463,8 @@ thead.text-muted th,
     box-sizing: border-box !important;
     white-space: nowrap !important;
     text-decoration: none !important;
-    gap: 4px !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
 }
 
 /* Nút Dọn Xong Soft Amber Pastel */

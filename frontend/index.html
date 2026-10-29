@@ -125,7 +125,7 @@
 
                     <div class="row g-3">
                         <!-- Thẻ 1: Tổng số phòng (Hồng phấn #FFE2E5, icon tròn #FA5A7D) -->
-                        <div class="col-6 col-xl-3">
+                        <div class="col-6 col-md-4 col-xl">
                             <div class="kpi-card kpi-pink stat-card card-all" onclick="filterRooms('all')">
                                 <div class="kpi-icon-circle">
                                     <i class="fa-solid fa-layer-group text-white"></i>
@@ -137,7 +137,7 @@
                         </div>
 
                         <!-- Thẻ 2: Phòng trống (Vàng kem #FFF4DE, icon tròn #FF947A) -->
-                        <div class="col-6 col-xl-3">
+                        <div class="col-6 col-md-4 col-xl">
                             <div class="kpi-card kpi-yellow stat-card card-trong" onclick="filterRooms('Trống')">
                                 <div class="kpi-icon-circle">
                                     <i class="fa-solid fa-door-open text-white"></i>
@@ -149,7 +149,7 @@
                         </div>
 
                         <!-- Thẻ 3: Đang có khách (Xanh mint #DCFCE7, icon tròn #3CD856) -->
-                        <div class="col-6 col-xl-3">
+                        <div class="col-6 col-md-4 col-xl">
                             <div class="kpi-card kpi-green stat-card card-thue" onclick="filterRooms('Đang thuê')">
                                 <div class="kpi-icon-circle">
                                     <i class="fa-solid fa-bed text-white"></i>
@@ -160,15 +160,27 @@
                             </div>
                         </div>
 
-                        <!-- Thẻ 4: Đang dọn / Bảo trì (Tím lavender #F3E8FF, icon tròn #BF83FF) -->
-                        <div class="col-6 col-xl-3">
-                            <div class="kpi-card kpi-purple stat-card card-don" onclick="filterRooms('Đang dọn')">
-                                <div class="kpi-icon-circle">
-                                    <i class="fa-solid fa-broom text-white"></i>
+                        <!-- Thẻ 4: Đang dọn dẹp (Vàng kem pastel, icon chổi #FF947A) -->
+                        <div class="col-6 col-md-4 col-xl">
+                            <div class="kpi-card stat-card card-don" style="background: #FFF4DE;" onclick="filterRooms('Đang dọn')">
+                                <div class="kpi-icon-circle" style="background: #FF947A; color: #FFFFFF;">
+                                    <i class="fa-solid fa-broom"></i>
                                 </div>
                                 <div class="kpi-value" id="kpi-cleaning-rooms">0</div>
-                                <div class="kpi-title">Đang dọn / Bảo trì</div>
-                                <div class="kpi-note">Chờ xử lý buồng</div>
+                                <div class="kpi-title">Đang dọn dẹp</div>
+                                <div class="kpi-note">Chờ vệ sinh buồng</div>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ 5: Bảo trì (Tím lavender #F3E8FF, icon cờ-lê #BF83FF) -->
+                        <div class="col-12 col-md-4 col-xl">
+                            <div class="kpi-card kpi-purple stat-card card-baotri" onclick="filterRooms('Bảo trì')">
+                                <div class="kpi-icon-circle">
+                                    <i class="fa-solid fa-wrench text-white"></i>
+                                </div>
+                                <div class="kpi-value" id="kpi-maintenance-rooms">0</div>
+                                <div class="kpi-title">Bảo trì</div>
+                                <div class="kpi-note">Sửa chữa / Kiểm tra</div>
                             </div>
                         </div>
                     </div>
@@ -178,11 +190,11 @@
                 <div class="card border-0 shadow-sm p-3 mb-4">
                     <div class="d-flex flex-wrap gap-2 align-items-center">
                         <strong class="me-2 text-secondary"><i class="fa-solid fa-filter me-1"></i>Lọc phòng:</strong>
-                        <button class="btn btn-sm btn-dark filter-btn active" onclick="filterRooms('all', this)">Tất cả</button>
-                        <button class="btn btn-sm btn-outline-success filter-btn" onclick="filterRooms('Trống', this)">Phòng Trống</button>
-                        <button class="btn btn-sm btn-outline-danger filter-btn" onclick="filterRooms('Đang thuê', this)">Đang Thuê</button>
-                        <button class="btn btn-sm btn-outline-warning filter-btn" onclick="filterRooms('Đang dọn', this)">Đang Dọn</button>
-                        <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterRooms('Bảo trì', this)">Bảo Trì</button>
+                        <button class="btn btn-sm filter-btn active" id="btn-filter-all" onclick="filterRooms('all', this)">Tất cả</button>
+                        <button class="btn btn-sm filter-btn" id="btn-filter-trong" onclick="filterRooms('Trống', this)">Phòng Trống</button>
+                        <button class="btn btn-sm filter-btn" id="btn-filter-thue" onclick="filterRooms('Đang thuê', this)">Đang Thuê</button>
+                        <button class="btn btn-sm filter-btn" id="btn-filter-don" onclick="filterRooms('Đang dọn', this)">Đang Dọn Dẹp</button>
+                        <button class="btn btn-sm filter-btn" id="btn-filter-baotri" onclick="filterRooms('Bảo trì', this)">Bảo Trì</button>
                     </div>
                 </div>
 
@@ -204,24 +216,26 @@
                     </button>
                 </div>
 
-                <div class="table-responsive table-custom">
-                    <table class="table table-hover align-middle m-0" style="min-width: 950px;">
-                        <thead>
-                            <tr>
-                                <th style="width: 110px;">Mã Phiếu</th>
-                                <th style="width: 150px;">Khách Hàng</th>
-                                <th>Phòng & Giá Áp Dụng</th>
-                                <th style="width: 110px;">Hình Thức</th>
-                                <th style="width: 115px;">Giờ Nhận</th>
-                                <th style="width: 115px;">Giờ Trả Dự Kiến</th>
-                                <th style="width: 110px;" class="text-center">Trạng Thái</th>
-                                <th class="text-center" style="width: 185px; min-width: 185px;">Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rentals-table-body">
-                            <tr><td colspan="8" class="text-center py-4 text-muted">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="table-custom mb-4">
+                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-hover align-middle m-0" style="min-width: 1020px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 115px; min-width: 110px;">Mã Phiếu</th>
+                                    <th style="width: 160px; min-width: 150px;">Khách Hàng</th>
+                                    <th style="min-width: 160px;">Phòng & Giá Áp Dụng</th>
+                                    <th style="width: 115px; min-width: 110px;">Hình Thức</th>
+                                    <th style="width: 125px; min-width: 120px;">Giờ Nhận</th>
+                                    <th style="width: 125px; min-width: 120px;">Giờ Trả Dự Kiến</th>
+                                    <th style="width: 115px; min-width: 110px;" class="text-center">Trạng Thái</th>
+                                    <th class="text-center" style="width: 210px; min-width: 210px; white-space: nowrap;">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rentals-table-body">
+                                <tr><td colspan="8" class="text-center py-4 text-muted">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -230,25 +244,27 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold m-0">Danh Sách Hóa Đơn Khách Sạn</h5>
                 </div>
-                <div class="table-responsive table-custom">
-                    <table class="table table-hover align-middle m-0" style="min-width: 960px;">
-                        <thead>
-                            <tr>
-                                <th style="width: 105px;">Mã HĐ</th>
-                                <th style="width: 100px;">Mã Phiếu Thuê</th>
-                                <th style="width: 115px;">Ngày Lập</th>
-                                <th style="width: 95px;">Tiền Phòng</th>
-                                <th style="width: 90px;">Tiền Dịch Vụ</th>
-                                <th style="width: 80px;">Ưu Đãi</th>
-                                <th style="width: 125px;">Tổng Cộng (Gồm VAT)</th>
-                                <th style="width: 110px;" class="text-center">Trạng Thái</th>
-                                <th class="text-center" style="width: 175px; min-width: 175px;">Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invoices-table-body">
-                            <tr><td colspan="9" class="text-center py-4 text-muted">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="table-custom mb-4">
+                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-hover align-middle m-0" style="min-width: 1060px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 110px; min-width: 105px;">Mã HĐ</th>
+                                    <th style="width: 110px; min-width: 105px;">Mã Phiếu Thuê</th>
+                                    <th style="width: 125px; min-width: 120px;">Ngày Lập</th>
+                                    <th style="width: 105px; min-width: 100px;">Tiền Phòng</th>
+                                    <th style="width: 100px; min-width: 95px;">Tiền Dịch Vụ</th>
+                                    <th style="width: 90px; min-width: 85px;">Ưu Đãi</th>
+                                    <th style="width: 130px; min-width: 125px;">Tổng Cộng (Gồm VAT)</th>
+                                    <th style="width: 120px; min-width: 115px;" class="text-center">Trạng Thái</th>
+                                    <th class="text-center" style="width: 210px; min-width: 200px; white-space: nowrap;">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoices-table-body">
+                                <tr><td colspan="9" class="text-center py-4 text-muted">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -260,21 +276,23 @@
                         <i class="fa-solid fa-bell-concierge me-1"></i> Ghi Nhận Dùng Dịch Vụ
                     </button>
                 </div>
-                <div class="table-custom">
-                    <table class="table table-hover m-0">
-                        <thead>
-                            <tr>
-                                <th>Mã DV</th>
-                                <th>Tên Dịch Vụ</th>
-                                <th>Đơn Giá</th>
-                                <th>Đơn Vị Tính</th>
-                                <th>Mô Tả</th>
-                            </tr>
-                        </thead>
-                        <tbody id="services-table-body">
-                            <tr><td colspan="5" class="text-center py-4 text-muted">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="table-custom mb-4">
+                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-hover align-middle m-0" style="min-width: 750px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 110px; min-width: 100px;">Mã DV</th>
+                                    <th style="width: 220px; min-width: 200px;">Tên Dịch Vụ</th>
+                                    <th style="width: 140px; min-width: 130px;">Đơn Giá</th>
+                                    <th style="width: 130px; min-width: 120px;">Đơn Vị Tính</th>
+                                    <th>Mô Tả</th>
+                                </tr>
+                            </thead>
+                            <tbody id="services-table-body">
+                                <tr><td colspan="5" class="text-center py-4 text-muted">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -289,24 +307,26 @@
                         <i class="fa-solid fa-user-plus me-1"></i> Thêm Khách Hàng
                     </button>
                 </div>
-                <div class="table-custom">
-                    <table class="table table-hover m-0">
-                        <thead>
-                            <tr>
-                                <th>Mã KH</th>
-                                <th>Họ & Tên</th>
-                                <th>Ngày Sinh</th>
-                                <th>Số CCCD</th>
-                                <th>Số Điện Thoại</th>
-                                <th>Địa Chỉ</th>
-                                <th>Hạng Thành Viên</th>
-                                <th>Ưu Đãi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-table-body">
-                            <tr><td colspan="8" class="text-center py-4 text-muted">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="table-custom mb-4">
+                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-hover align-middle m-0" style="min-width: 920px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px; min-width: 95px;">Mã KH</th>
+                                    <th style="width: 160px; min-width: 150px;">Họ & Tên</th>
+                                    <th style="width: 120px; min-width: 110px;">Ngày Sinh</th>
+                                    <th style="width: 130px; min-width: 120px;">Số CCCD</th>
+                                    <th style="width: 130px; min-width: 120px;">Số Điện Thoại</th>
+                                    <th>Địa Chỉ</th>
+                                    <th style="width: 140px; min-width: 130px;">Hạng Thành Viên</th>
+                                    <th style="width: 100px; min-width: 95px;">Ưu Đãi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-table-body">
+                                <tr><td colspan="8" class="text-center py-4 text-muted">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -761,17 +781,17 @@
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm p-3">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle m-0">
-                            <thead class="table-light">
+                <div class="table-custom mb-4">
+                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-hover align-middle m-0" style="min-width: 860px; width: 100%;">
+                            <thead>
                                 <tr>
-                                    <th style="width: 100px;">Mã NV</th>
-                                    <th>Họ Và Tên</th>
-                                    <th>Tên Đăng Nhập</th>
-                                    <th style="width: 150px;">Chức Vụ</th>
-                                    <th style="width: 130px;">Trạng Thái</th>
-                                    <th>Phân Quyền Hệ Thống</th>
+                                    <th style="width: 100px; min-width: 95px;">Mã NV</th>
+                                    <th style="width: 180px; min-width: 170px;">Họ Và Tên</th>
+                                    <th style="width: 140px; min-width: 130px;">Tên Đăng Nhập</th>
+                                    <th style="width: 140px; min-width: 130px;">Chức Vụ</th>
+                                    <th style="width: 130px; min-width: 120px;" class="text-center">Trạng Thái</th>
+                                    <th style="min-width: 180px;">Phân Quyền Hệ Thống</th>
                                 </tr>
                             </thead>
                             <tbody id="staff-table-body">
@@ -1177,7 +1197,10 @@ async function loadDashboard() {
         document.getElementById('kpi-total-rooms').innerText = stats.tong_phong;
         document.getElementById('kpi-empty-rooms').innerText = stats.phong_trong;
         document.getElementById('kpi-rented-rooms').innerText = stats.phong_dang_thue;
-        document.getElementById('kpi-cleaning-rooms').innerText = `${stats.phong_dang_don} / ${stats.phong_bao_tri}`;
+        document.getElementById('kpi-cleaning-rooms').innerText = stats.phong_dang_don;
+        if (document.getElementById('kpi-maintenance-rooms')) {
+            document.getElementById('kpi-maintenance-rooms').innerText = stats.phong_bao_tri;
+        }
 
         renderRooms(allRooms);
     } catch (err) {
@@ -1291,15 +1314,26 @@ function renderRooms(rooms) {
 
 // Lọc phòng
 function filterRooms(status, btn = null) {
-    if (btn) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+
+    if (btn && btn.classList.contains('filter-btn')) {
         btn.classList.add('active');
+    } else {
+        const mapId = {
+            'all': 'btn-filter-all',
+            'Trống': 'btn-filter-trong',
+            'Đang thuê': 'btn-filter-thue',
+            'Đang dọn': 'btn-filter-don',
+            'Bảo trì': 'btn-filter-baotri'
+        };
+        const targetBtn = document.getElementById(mapId[status]);
+        if (targetBtn) targetBtn.classList.add('active');
     }
 
     if (status === 'all') {
         renderRooms(allRooms);
     } else {
-        const filtered = allRooms.filter(r => r.TinhTrang === status);
+        const filtered = allRooms.filter(r => (r.TinhTrang || '').trim() === status.trim());
         renderRooms(filtered);
     }
 }
@@ -1353,7 +1387,7 @@ async function loadRentals() {
                     <td class="small">${gioTra}</td>
                     <td><span class="badge ${badgeStatus}">${pt.TrangThai}</span></td>
                     <td class="text-center align-middle" style="white-space: nowrap;">
-                        <div class="d-flex align-items-center justify-content-center gap-1">
+                        <div class="d-flex align-items-center justify-content-center" style="gap: 8px;">
                             ${pt.TrangThai === 'Đang thuê' ? `
                                 <button class="btn btn-sm btn-outline-danger action-btn-fixed" onclick="checkOut('${pt.MaPhieuThue}')" title="Trả phòng">
                                     <i class="fa-solid fa-sign-out-alt me-1"></i>Trả phòng
@@ -1500,7 +1534,7 @@ async function loadInvoices() {
                     <td class="fw-bold fs-6 text-dark">${formatMoney(h.TongTien)}</td>
                     <td><span class="badge ${isPaid ? 'bg-success' : 'bg-danger'}">${h.TrangThai}</span></td>
                     <td class="text-center align-middle" style="white-space: nowrap;">
-                        <div class="d-flex align-items-center justify-content-center gap-1">
+                        <div class="d-flex align-items-center justify-content-center" style="gap: 8px;">
                             <button class="btn btn-sm btn-outline-primary action-btn-fixed" onclick="createInvoice('${h.MaPhieuThue}')" title="Xem & In Hóa Đơn">
                                 <i class="fa-solid fa-file-invoice me-1"></i>Xem HĐ
                             </button>
