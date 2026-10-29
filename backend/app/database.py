@@ -7,6 +7,19 @@ from backend.app.config import settings
 
 logger = logging.getLogger("uvicorn.error")
 
+import os
+import sys
+import logging
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from backend.app.config import settings
+
+# Nạp file .env ở máy local
+load_dotenv()
+
+logger = logging.getLogger("uvicorn.error")
+
 DATABASE_URL = (
     os.getenv("DATABASE_URL")
     or os.getenv("SUPABASE_DB_URL")
@@ -33,10 +46,14 @@ if "supabase" in DATABASE_URL.lower() and "sslmode" not in DATABASE_URL.lower():
 # Tự động phát hiện môi trường Cloud (Render/Linux) hoặc khi không thể kết nối SQL Server localhost
 is_cloud = bool(os.getenv("RENDER") or os.getenv("PORT") or sys.platform != "win32" or settings.ENVIRONMENT == "production")
 
-# Nếu chạy trên Cloud mà DATABASE_URL vẫn trỏ vào localhost/SQLEXPRESS cục bộ -> tự động dùng SQLite dự phòng
+# Nếu chạy trên Cloud mà DATABASE_URL vẫn trỏ vào localhost/SQLEXPRESS cục bộ -> VĂNG LỖI CẢNH BÁO
 if is_cloud and ("localhost" in DATABASE_URL or "SQLEXPRESS" in DATABASE_URL or "127.0.0.1" in DATABASE_URL):
-    logger.warning("Phát hiện môi trường Cloud nhưng DATABASE_URL vẫn trỏ về localhost SQL Server. Kích hoạt SQLite dự phòng...")
-    DATABASE_URL = f"sqlite:///{FALLBACK_DB_PATH}"
+    logger.error("CRITICAL: Bạn đang chạy trên Cloud nhưng chưa cấu hình biến môi trường DATABASE_URL cho Supabase!")
+    raise RuntimeError(
+        "CRITICAL ERROR: Thiếu biến môi trường DATABASE_URL trên Render! "
+        "App không thể kết nối tới SQL Server localhost từ Cloud. "
+        "Vui lòng vào Render Dashboard > Environment và thêm biến DATABASE_URL trỏ tới Supabase."
+    )
 
 # Nếu cấu hình Remote SQL Server trên Linux qua pyodbc mà không có driver -> tự động chuyển sang pymssql
 if is_cloud and "mssql+pyodbc" in DATABASE_URL:
@@ -63,8 +80,10 @@ elif "pymssql" in DATABASE_URL:
     connect_args["charset"] = "utf8"
     engine_kwargs["pool_recycle"] = 300
 elif "postgresql" in DATABASE_URL or "postgres" in DATABASE_URL:
-    connect_args["connect_timeout"] = 5
+    connect_args["connect_timeout"] = 10
     engine_kwargs["pool_recycle"] = 300
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
 
 engine_kwargs["connect_args"] = connect_args
 
@@ -74,9 +93,18 @@ try:
     with engine.connect() as conn:
         logger.info(f"Kết nối cơ sở dữ liệu thành công: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else 'Local SQL Server'}")
 except Exception as e:
-    logger.warning(f"Không thể kết nối CSDL chính ({e}). Chuyển sang dùng SQLite dự phòng...")
-    DATABASE_URL = f"sqlite:///{FALLBACK_DB_PATH}"
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+    target_clean = DATABASE_URL.split("@")[-1] if "@" in DATABASE_URL else DATABASE_URL
+    # Trên Cloud hoặc khi đã chỉ định PostgreSQL/Supabase: Văng lỗi ngay, không âm thầm fallback sang SQLite
+    if is_cloud or "postgres" in DATABASE_URL.lower() or "supabase" in DATABASE_URL.lower():
+        logger.error(f"CRITICAL ERROR: Không thể kết nối cơ sở dữ liệu ({target_clean}). Chi tiết: {e}")
+        raise RuntimeError(
+            f"CRITICAL: Không thể kết nối Database ({target_clean}). "
+            f"Vui lòng kiểm tra lại biến môi trường DATABASE_URL trên Render! Chi tiết lỗi: {e}"
+        )
+    else:
+        logger.warning(f"Không thể kết nối CSDL chính ({e}). Chế độ Local -> Chuyển sang SQLite dự phòng...")
+        DATABASE_URL = f"sqlite:///{FALLBACK_DB_PATH}"
+        engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

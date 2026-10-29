@@ -232,21 +232,6 @@ def generate_invoice(ma_pt: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_hd)
 
-    # Cập nhật thêm TongTien trong SQLite fallback nếu cần
-    if db.bind and db.bind.dialect.name == "sqlite":
-        try:
-            subtotal = max(0.0, tien_phong + tien_dich_vu - uu_dai)
-            vat_val = round(subtotal * 0.1)
-            tong_val = round(subtotal + vat_val)
-            db.execute(text("UPDATE HoaDon SET TongTien = :tong, TienVAT = :vat WHERE MaHD = :ma"), {
-                'tong': tong_val,
-                'vat': vat_val,
-                'ma': ma_hd
-            })
-            db.commit()
-        except Exception:
-            pass
-
     return build_rich_invoice_response(new_hd, pt, db)
 
 @router.post("/{ma_hd}/thanh-toan")
@@ -258,7 +243,7 @@ def pay_invoice(ma_hd: str, db: Session = Depends(get_db)):
     if hd.TrangThai == "Đã thanh toán":
         return {"message": f"Hóa đơn {ma_hd} đã được thanh toán trước đó."}
 
-    # Chuyển đổi an toàn các trường tiền sang float (tránh lỗi cộng chuỗi trên SQLite fallback)
+    # Chuyển đổi an toàn các trường tiền sang float
     try:
         tp = float(hd.TienPhong or 0)
     except (ValueError, TypeError):
@@ -280,34 +265,24 @@ def pay_invoice(ma_hd: str, db: Session = Depends(get_db)):
     except (ValueError, TypeError):
         vat_rate = 10.0
 
-    # 1. Lấy đúng tổng tiền thực tế từ cột TongTien nếu có sẵn
-    res_tong = db.execute(text("SELECT TongTien FROM HoaDon WHERE MaHD = :ma"), {'ma': ma_hd}).scalar()
-    if res_tong is not None:
-        try:
-            tong_tien = round(float(res_tong))
-        except (ValueError, TypeError):
-            tien_goc = tp + tdv + tpt - ud
-            vat = round(tien_goc * vat_rate / 100.0)
-            tong_tien = round(tien_goc + vat)
-    else:
-        tien_goc = tp + tdv + tpt - ud
-        vat = round(tien_goc * vat_rate / 100.0)
-        tong_tien = round(tien_goc + vat)
+    # 1. Tính đúng tổng tiền thực tế
+    tien_goc = tp + tdv + tpt - ud
+    vat = round(tien_goc * vat_rate / 100.0)
+    tong_tien = round(tien_goc + vat)
 
-    # 2. Kiểm tra số tiền đã thu trong bảng ThanhToan (truyền tham số Unicode chuẩn cho SQL Server & SQLite)
-    res_da_thu = db.execute(text("""
-        SELECT COALESCE(SUM(CASE LoaiKhoan WHEN :hoan_tien THEN -SoTien ELSE SoTien END), 0)
-        FROM ThanhToan WHERE MaPhieuThue = :pt
-    """), {'hoan_tien': 'Hoàn tiền', 'pt': hd.MaPhieuThue}).scalar()
-    da_thu = float(res_da_thu or 0)
+    # 2. Kiểm tra số tiền đã thu trong bảng ThanhToan qua ORM (tương thích 100% PostgreSQL, MSSQL, SQLite)
+    payments = db.query(ThanhToan).filter(ThanhToan.MaPhieuThue == hd.MaPhieuThue).all()
+    da_thu = sum(
+        -float(p.SoTien or 0) if p.LoaiKhoan == "Hoàn tiền" else float(p.SoTien or 0)
+        for p in payments
+    )
 
     can_thu = max(0, round(tong_tien - da_thu))
 
     # 3. Nếu chưa đủ tiền, tạo bản ghi ThanhToan mới (loại Thanh toán)
-    # để thỏa mãn trigger TR_HoaDon_KiemTra và TR_ThanhToan_KiemTra
     if can_thu > 0:
-        row = db.execute(text("SELECT MAX(MaThanhToan) FROM ThanhToan WHERE MaThanhToan LIKE 'TTT%'")).fetchone()
-        max_val = row[0] if row else None
+        last_tt = db.query(ThanhToan.MaThanhToan).filter(ThanhToan.MaThanhToan.like("TTT%")).order_by(ThanhToan.MaThanhToan.desc()).first()
+        max_val = last_tt[0] if last_tt else None
         num = 1
         if max_val and max_val.startswith("TTT"):
             try:
@@ -316,18 +291,16 @@ def pay_invoice(ma_hd: str, db: Session = Depends(get_db)):
                 num = 1
         ma_tt = f"TTT{num:04d}"
 
-        db.execute(text("""
-            INSERT INTO ThanhToan (MaThanhToan, MaPhieuThue, MaNV, NgayGioThanhToan, PhuongThuc, SoTien, LoaiKhoan)
-            VALUES (:matt, :mapt, :manv, :ngay, :pt, :sotien, :loai)
-        """), {
-            'matt': ma_tt,
-            'mapt': hd.MaPhieuThue,
-            'manv': hd.MaNV or 'NV01',
-            'ngay': datetime.now(),
-            'pt': 'Tiền mặt',
-            'sotien': can_thu,
-            'loai': 'Thanh toán'
-        })
+        new_tt = ThanhToan(
+            MaThanhToan=ma_tt,
+            MaPhieuThue=hd.MaPhieuThue,
+            MaNV=hd.MaNV or "NV01",
+            NgayGioThanhToan=datetime.now(),
+            PhuongThuc="Tiền mặt",
+            SoTien=can_thu,
+            LoaiKhoan="Thanh toán"
+        )
+        db.add(new_tt)
 
     # 4. Cập nhật trạng thái hóa đơn sang Đã thanh toán
     hd.TrangThai = "Đã thanh toán"

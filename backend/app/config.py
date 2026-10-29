@@ -1,12 +1,16 @@
 import os
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
+
+# Nạp biến môi trường từ file .env nếu có
+load_dotenv()
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "QuanLyKhachSan API"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     
-    # Kết nối trực tiếp vào SQL Server cục bộ hoặc Cloud qua DATABASE_URL
+    # Kết nối trực tiếp vào Supabase / Cloud DB hoặc SQL Server cục bộ
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
         "mssql+pyodbc://localhost\\SQLEXPRESS01/QuanLyKhachSan?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes&Trusted_Connection=yes"

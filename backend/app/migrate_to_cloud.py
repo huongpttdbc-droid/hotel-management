@@ -1,40 +1,39 @@
 """
 backend/app/migrate_to_cloud.py
-Script hỗ trợ chuyển toàn bộ dữ liệu từ SQL Server Local (hoặc SQLite fallback) sang Cloud Database (Supabase / Render Postgres / Neon / Aiven / Azure SQL).
-
-Cách dùng:
-    python backend/app/migrate_to_cloud.py "<TARGET_DATABASE_URL>"
-
-Ví dụ:
-    python backend/app/migrate_to_cloud.py "postgresql://postgres.xxx:mypassword@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
-    python backend/app/migrate_to_cloud.py "postgres://hotel_user:pass@dpg-xxx-a.singapore-postgres.render.com/hotel_db"
+Script chuyển toàn bộ dữ liệu từ SQL Server Local (localhost\\SQLEXPRESS01) sang Cloud Database (Supabase PostgreSQL).
 """
 
 import os
 import sys
 
-# Đảm bảo đường dẫn gốc của project luôn có trong sys.path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from sqlalchemy import create_engine, text
-from backend.app.database import engine as source_engine, Base
-import backend.app.models  # Nạp các model để lấy danh sách bảng
+from backend.app.database import Base
+import backend.app.models
 
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
+LOCAL_SQL_SERVER = "mssql+pyodbc://localhost\\SQLEXPRESS01/QuanLyKhachSan?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes&Trusted_Connection=yes"
+FALLBACK_SQLITE = os.path.join(BASE_DIR, "hotel_fallback.db").replace("\\", "/")
+
+def get_source_engine():
+    try:
+        engine = create_engine(LOCAL_SQL_SERVER, connect_args={"timeout": 3})
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            print("   -> CSDL Nguồn: Microsoft SQL Server (localhost\\SQLEXPRESS01)", flush=True)
+            return engine
+    except Exception as e:
+        print(f"   -> Không kết nối được SQL Server ({e}), dùng SQLite fallback...", flush=True)
+        return create_engine(f"sqlite:///{FALLBACK_SQLITE}", connect_args={"check_same_thread": False})
+
 def main():
     if len(sys.argv) < 2:
-        print("=" * 70)
-        print("HƯỚNG DẪN ĐỒNG BỘ DỮ LIỆU LÊN CLOUD DATABASE")
-        print("=" * 70)
-        print("Cú pháp: python backend/app/migrate_to_cloud.py \"<TARGET_DATABASE_URL>\"\n")
-        print("Ví dụ PostgreSQL (Supabase / Neon / Render):")
-        print("  python backend/app/migrate_to_cloud.py \"postgresql://postgres:pass@db.xxx.supabase.co:5432/postgres\"\n")
-        print("Ví dụ SQL Server Cloud (Azure SQL / Aiven MSSQL):")
-        print("  python backend/app/migrate_to_cloud.py \"mssql+pymssql://user:pass@server.database.windows.net:1433/hoteldb\"\n")
+        print("Cú pháp: python backend/app/migrate_to_cloud.py \"<TARGET_DATABASE_URL>\"", flush=True)
         sys.exit(1)
 
     target_url = sys.argv[1].strip()
@@ -43,66 +42,75 @@ def main():
     elif target_url.startswith("postgresql://") and "+psycopg2" not in target_url:
         target_url = target_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
-    print(f"1. Đang kết nối tới CSDL Nguồn (Source): {source_engine.url.render_as_string(hide_password=True)}")
-    print(f"2. Đang kết nối tới CSDL Đích (Target Cloud): {target_url.split('@')[-1] if '@' in target_url else target_url}")
+    source_engine = get_source_engine()
 
-    try:
-        target_engine = create_engine(target_url, pool_pre_ping=True)
-        with target_engine.connect() as conn:
-            print("   -> Kết nối Cloud Database thành công!")
-    except Exception as e:
-        print(f"   [LỖI] Không thể kết nối tới Cloud Database: {e}")
-        sys.exit(1)
+    print(f"1. CSDL Nguồn: {source_engine.url.render_as_string(hide_password=True)}", flush=True)
+    print(f"2. CSDL Đích: {target_url.split('@')[-1] if '@' in target_url else target_url}", flush=True)
 
-    print("\n3. Đang tự động tạo cấu trúc bảng (Schema & Tables) trên Cloud Database...")
-    try:
-        Base.metadata.create_all(bind=target_engine)
-        print("   -> Đã khởi tạo cấu trúc toàn bộ 18 bảng thành công!")
-    except Exception as e:
-        print(f"   [CẢNH BÁO] Lỗi khi tạo bảng: {e}")
+    target_engine = create_engine(target_url, pool_pre_ping=True)
+    with target_engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+        print("   -> Kết nối Cloud Database thành công!", flush=True)
 
-    # Thứ tự sao chép bảng theo thứ tự quan hệ khóa ngoại (Foreign Keys)
+    print("\n3. Đang tự động kiểm tra và tạo cấu trúc bảng...", flush=True)
+    Base.metadata.create_all(bind=target_engine)
+    print("   -> Cấu trúc bảng đã sẵn sàng!", flush=True)
+
     table_order = [
-        "LoaiKhachHang", "KhachHang", "KhachHang_SDT", "KhachHang_Email",
-        "NhanVien", "NhanVien_SDT", "NhanVien_Email", "TaiKhoan",
-        "LoaiPhong", "Phong", "PhieuThue", "ChiTietPhieuThue",
-        "KhachDiCung", "OCung", "DichVu", "DungDichVu", "ThanhToan", "HoaDon"
+        "LoaiKhachHang", "KhachHang", "KhachHang_SDT",
+        "NhanVien", "TaiKhoan",
+        "LoaiPhong", "Phong",
+        "PhieuThue", "ChiTietPhieuThue",
+        "DichVu", "DungDichVu",
+        "HoaDon", "ThanhToan"
     ]
 
-    print("\n4. Bắt đầu sao chép dữ liệu từng bảng:")
+    is_postgres = "postgres" in target_url.lower()
+
+    print("\n4. Làm sạch dữ liệu cũ theo thứ tự ngược...", flush=True)
+    with target_engine.begin() as clean_conn:
+        for t in reversed(table_order):
+            tbl_name = f'"{t}"' if is_postgres else t
+            clean_conn.execute(text(f"DELETE FROM {tbl_name}"))
+
+    print("\n5. Bắt đầu sao chép dữ liệu từng bảng:", flush=True)
     total_copied = 0
 
-    with source_engine.connect() as src_conn:
-        for tbl in table_order:
-            try:
-                # Đọc dữ liệu từ nguồn
-                rows = src_conn.execute(text(f'SELECT * FROM "{tbl}"' if "sqlite" in str(source_engine.url) else f"SELECT * FROM {tbl}")).mappings().all()
-                if not rows:
-                    print(f"   - {tbl:20s}: 0 bản ghi (trống)")
-                    continue
+    for tbl in table_order:
+        try:
+            # Đọc từ source
+            with source_engine.connect() as src_conn:
+                q_src = f'SELECT * FROM "{tbl}"' if "sqlite" in str(source_engine.url) else f"SELECT * FROM {tbl}"
+                rows = src_conn.execute(text(q_src)).mappings().all()
 
-                # Ghi vào đích
-                with target_engine.begin() as tgt_conn:
-                    # Xóa dữ liệu cũ nếu có
-                    tgt_conn.execute(text(f'DELETE FROM "{tbl}"' if "postgres" in target_url else f"DELETE FROM {tbl}"))
-                    
-                    cols = list(rows[0].keys())
-                    col_names = ", ".join([f'"{c}"' if "postgres" in target_url else c for c in cols])
-                    val_placeholders = ", ".join([f":{c}" for c in cols])
-                    
-                    insert_stmt = text(f'INSERT INTO {"\"" + tbl + "\"" if "postgres" in target_url else tbl} ({col_names}) VALUES ({val_placeholders})')
-                    tgt_conn.execute(insert_stmt, [dict(r) for r in rows])
+            if not rows:
+                print(f"   - {tbl:18s}: 0 bản ghi", flush=True)
+                continue
 
-                print(f"   - {tbl:20s}: Đã đồng bộ {len(rows)} bản ghi.")
-                total_copied += len(rows)
-            except Exception as te:
-                print(f"   - [Bỏ qua/Lỗi] {tbl:16s}: {te}")
+            # Lấy danh sách cột được định nghĩa trong ORM model
+            model_cols = set(Base.metadata.tables[tbl].columns.keys())
+            src_keys = list(rows[0].keys())
+            valid_cols = [c for c in src_keys if c in model_cols]
 
-    print("\n" + "=" * 70)
-    print(f"HOÀN TẤT ĐỒNG BỘ: Đã sao chép thành công {total_copied} bản ghi lên Cloud Database!")
-    print("Bây giờ bạn chỉ cần copy chuỗi kết nối dán vào biến môi trường DATABASE_URL trên Render:")
-    print(f"DATABASE_URL = {target_url}")
-    print("=" * 70)
+            tbl_name = f'"{tbl}"' if is_postgres else tbl
+            col_str = ", ".join([f'"{c}"' if is_postgres else c for c in valid_cols])
+            val_str = ", ".join([f":{c}" for c in valid_cols])
+            insert_stmt = text(f"INSERT INTO {tbl_name} ({col_str}) VALUES ({val_str})")
+
+            payloads = [{c: r[c] for c in valid_cols} for r in rows]
+
+            with target_engine.begin() as tgt_conn:
+                tgt_conn.execute(insert_stmt, payloads)
+
+            print(f"   - {tbl:18s}: Đã đồng bộ {len(rows)} bản ghi.", flush=True)
+            total_copied += len(rows)
+
+        except Exception as te:
+            print(f"   - [Lỗi] {tbl:18s}: {te}", flush=True)
+
+    print("\n" + "=" * 70, flush=True)
+    print(f"HOÀN TẤT ĐỒNG BỘ: Đã sao chép thành công {total_copied} bản ghi lên Supabase!", flush=True)
+    print("=" * 70, flush=True)
 
 if __name__ == "__main__":
     main()
