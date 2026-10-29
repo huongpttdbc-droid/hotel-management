@@ -708,3 +708,60 @@ thead.text-muted th,
     padding: 18px 26px !important;
     background: #FAFBFC !important;
 }
+
+/* ==========================================================================
+   10. PRINT MEDIA STYLING (Xuất & In Báo Cáo Doanh Thu Chuyên Nghiệp)
+   ========================================================================== */
+@media print {
+    /* Ẩn các thành phần điều hướng và nút thao tác khi in */
+    .sidebar,
+    .top-bar,
+    .content-section:not(#section-reports),
+    .time-filter-btn,
+    .btn,
+    button,
+    #roomCategorySearch,
+    .input-group,
+    #viewBtnCeo,
+    #viewBtnManager,
+    .modal,
+    .swal2-container {
+        display: none !important;
+    }
+
+    /* Đảm bảo nền trắng và bảo toàn màu sắc biểu đồ, thẻ KPI */
+    body, html {
+        background: #FFFFFF !important;
+        color: #0F172A !important;
+        font-size: 11pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .main-content {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    #section-reports {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10mm !important;
+    }
+
+    .card, .report-card, .table-custom {
+        box-shadow: none !important;
+        border: 1px solid #CBD5E1 !important;
+        break-inside: avoid;
+    }
+
+    .table th {
+        background-color: #F1F5F9 !important;
+        color: #0F172A !important;
+    }
+}
