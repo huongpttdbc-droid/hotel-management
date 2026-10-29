@@ -78,6 +78,22 @@
         border-color: #1b3a5b;
         box-shadow: 0 2px 4px rgba(27, 58, 91, 0.25);
     }
+    /* Nút Thao Tác Cố Định & Cân Đối trong Bảng Hóa Đơn */
+    .action-btn-fixed {
+        width: 94px;
+        min-width: 94px;
+        height: 32px;
+        font-size: 0.8125rem;
+        padding: 0 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-weight: 500;
+        box-sizing: border-box;
+        white-space: nowrap;
+        text-decoration: none;
+    }
     @media print {
         body * {
             visibility: hidden !important;
@@ -140,9 +156,11 @@
                 <a href="booking.html" class="nav-link text-warning" target="_blank">
                     <i class="fa-solid fa-globe"></i> Trang Khách Đặt Phòng
                 </a>
-                <a href="/docs" class="nav-link text-info" target="_blank">
+                <!-- Swagger API Docs (Ẩn khỏi Sidebar UI; Dev/Quản trị viên truy cập trực tiếp qua URL /docs)
+                <a href="/docs" class="nav-link text-info d-none" target="_blank">
                     <i class="fa-solid fa-book-open"></i> Swagger API Docs
                 </a>
+                -->
             </div>
         </div>
 
@@ -235,7 +253,7 @@
                                 <th>Giờ Nhận</th>
                                 <th>Giờ Trả Dự Kiến</th>
                                 <th>Trạng Thái</th>
-                                <th>Thao Tác</th>
+                                <th class="text-center" style="width: 220px; min-width: 210px;">Thao Tác</th>
                             </tr>
                         </thead>
                         <tbody id="rentals-table-body">
@@ -262,7 +280,7 @@
                                 <th>Ưu Đãi</th>
                                 <th>Tổng Cộng (Gồm VAT)</th>
                                 <th>Trạng Thái</th>
-                                <th>Thao Tác</th>
+                                <th class="text-center" style="width: 220px; min-width: 210px;">Thao Tác</th>
                             </tr>
                         </thead>
                         <tbody id="invoices-table-body">
@@ -363,18 +381,50 @@
 
                 <!-- Thanh Công Cụ & Bộ Lọc Thời Gian -->
                 <div class="card border-0 shadow-sm p-3 mb-4 rounded-3 bg-white">
-                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3">
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <span class="small fw-bold text-muted text-uppercase me-1"><i class="fa-regular fa-calendar-days text-primary me-1"></i>Kỳ báo cáo:</span>
-                            <button onclick="changeReportPeriod('all', this)" class="time-filter-btn active">Toàn bộ CSDL</button>
-                            <button onclick="changeReportPeriod('today', this)" class="time-filter-btn">Hôm nay</button>
-                            <button onclick="changeReportPeriod('7days', this)" class="time-filter-btn">7 ngày qua</button>
-                            <button onclick="changeReportPeriod('thisMonth', this)" class="time-filter-btn">Tháng này (T10/2026)</button>
-                            <button onclick="changeReportPeriod('quarter', this)" class="time-filter-btn">Quý này</button>
+                            <button id="btn-period-all" onclick="changeReportPeriod('all', this)" class="time-filter-btn active">Toàn bộ CSDL</button>
+                            <button id="btn-period-today" onclick="changeReportPeriod('today', this)" class="time-filter-btn">Hôm nay</button>
+                            <button id="btn-period-7days" onclick="changeReportPeriod('7days', this)" class="time-filter-btn">7 ngày qua</button>
+                            <button id="btn-period-this-month" onclick="changeReportPeriod('thisMonth', this)" class="time-filter-btn">Tháng này</button>
+                            <button id="btn-period-quarter" onclick="changeReportPeriod('quarter', this)" class="time-filter-btn">Quý này</button>
+
+                            <!-- Bộ chọn động Tháng / Quý / Năm theo thời gian thực -->
+                            <div class="d-flex align-items-center gap-1 ms-xl-2 ps-xl-2 border-start">
+                                <span class="small text-muted fw-semibold me-1"><i class="fa-solid fa-filter me-1"></i>Tùy chọn:</span>
+                                <select id="report-select-month" class="form-select form-select-sm" style="width: 115px;" onchange="onCustomMonthChange()">
+                                    <option value="">-- Chọn Tháng --</option>
+                                    <option value="1">Tháng 1</option>
+                                    <option value="2">Tháng 2</option>
+                                    <option value="3">Tháng 3</option>
+                                    <option value="4">Tháng 4</option>
+                                    <option value="5">Tháng 5</option>
+                                    <option value="6">Tháng 6</option>
+                                    <option value="7">Tháng 7</option>
+                                    <option value="8">Tháng 8</option>
+                                    <option value="9">Tháng 9</option>
+                                    <option value="10">Tháng 10</option>
+                                    <option value="11">Tháng 11</option>
+                                    <option value="12">Tháng 12</option>
+                                </select>
+                                <select id="report-select-quarter" class="form-select form-select-sm" style="width: 105px;" onchange="onCustomQuarterChange()">
+                                    <option value="">-- Chọn Quý --</option>
+                                    <option value="1">Quý 1</option>
+                                    <option value="2">Quý 2</option>
+                                    <option value="3">Quý 3</option>
+                                    <option value="4">Quý 4</option>
+                                </select>
+                                <select id="report-select-year" class="form-select form-select-sm" style="width: 90px;" onchange="onCustomYearChange()">
+                                    <option value="2026">2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2027">2027</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                            <button onclick="loadReports(currentReportPeriod)" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" title="Làm mới số liệu tức thì">
+                            <button onclick="refreshCurrentReport()" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" title="Làm mới số liệu tức thì">
                                 <i class="fa-solid fa-arrow-rotate-right"></i>
                                 <span>Làm mới</span>
                             </button>
@@ -708,16 +758,57 @@
                     </div>
                     <span class="badge bg-danger px-3 py-2"><i class="fa-solid fa-lock me-1"></i>Dành riêng cho Quản Lý</span>
                 </div>
+
+                <!-- THANH TÌM KIẾM & BỘ LỌC CHỨC VỤ NHÂN SỰ -->
+                <div class="card border-0 shadow-sm p-3 mb-3 bg-white rounded-3">
+                    <div class="row g-2 align-items-center">
+                        <!-- Ô tìm kiếm theo tên, mã NV, username -->
+                        <div class="col-12 col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
+                                <input type="text" id="staff-search-input" class="form-control border-start-0" 
+                                    placeholder="Tìm theo tên nhân viên, mã NV (NV01)..." 
+                                    oninput="applyStaffFilters()">
+                            </div>
+                        </div>
+
+                        <!-- Dropdown bộ lọc chức vụ -->
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted">
+                                    <i class="fa-solid fa-user-tag me-1"></i>Chức vụ
+                                </span>
+                                <select id="staff-role-filter" class="form-select" onchange="applyStaffFilters()">
+                                    <option value="">-- Tất cả chức vụ --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Nút Xóa bộ lọc & Huy hiệu đếm -->
+                        <div class="col-12 col-sm-6 col-md-3 d-flex align-items-center justify-content-between justify-content-sm-end gap-2">
+                            <button id="btn-clear-staff-filter" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" onclick="clearStaffFilters()" title="Xóa toàn bộ điều kiện tìm kiếm và lọc">
+                                <i class="fa-solid fa-arrow-rotate-left"></i>
+                                <span>Xóa bộ lọc</span>
+                            </button>
+                            <span id="staff-count-badge" class="badge bg-light text-dark border px-2 py-2 small fw-semibold">
+                                Hiển thị: 0/0 NV
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card border-0 shadow-sm p-3">
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered align-middle m-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Mã NV</th>
+                                    <th style="width: 100px;">Mã NV</th>
                                     <th>Họ Và Tên</th>
                                     <th>Tên Đăng Nhập</th>
-                                    <th>Chức Vụ</th>
-                                    <th>Trạng Thái</th>
+                                    <th style="width: 150px;">Chức Vụ</th>
+                                    <th style="width: 130px;">Trạng Thái</th>
                                     <th>Phân Quyền Hệ Thống</th>
                                 </tr>
                             </thead>
@@ -997,6 +1088,7 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', () => {
     initCurrentUser();
     loadDashboard();
+    initReportDynamicLabels();
 });
 
 function initCurrentUser() {
@@ -1099,7 +1191,10 @@ function switchSection(section, evt = null) {
     else if (section === 'invoices') loadInvoices();
     else if (section === 'services') loadServices();
     else if (section === 'customers') loadCustomers();
-    else if (section === 'reports') loadReports();
+    else if (section === 'reports') {
+        initReportDynamicLabels();
+        loadReports();
+    }
     else if (section === 'staff') loadStaff();
 }
 
@@ -1430,17 +1525,21 @@ async function loadInvoices() {
                     <td class="text-success">${formatMoney(h.UuDai)}</td>
                     <td class="fw-bold fs-6 text-dark">${formatMoney(h.TongTien)}</td>
                     <td><span class="badge ${isPaid ? 'bg-success' : 'bg-danger'}">${h.TrangThai}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="createInvoice('${h.MaPhieuThue}')" title="Xem & In Hóa Đơn">
-                            <i class="fa-solid fa-file-invoice me-1"></i>Xem HĐ
-                        </button>
-                        ${!isPaid ? `
-                            <button class="btn btn-sm btn-success ms-1" onclick="payInvoice('${h.MaHD}')">
-                                <i class="fa-solid fa-credit-card me-1"></i>Thu tiền
+                    <td class="text-center align-middle" style="white-space: nowrap;">
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <button class="btn btn-sm btn-outline-primary action-btn-fixed" onclick="createInvoice('${h.MaPhieuThue}')" title="Xem & In Hóa Đơn">
+                                <i class="fa-solid fa-file-invoice me-1"></i>Xem HĐ
                             </button>
-                        ` : `
-                            <span class="text-success small ms-2"><i class="fa-solid fa-check-circle me-1"></i>Đã xong</span>
-                        `}
+                            ${!isPaid ? `
+                                <button class="btn btn-sm btn-success action-btn-fixed" onclick="payInvoice('${h.MaHD}')" title="Xác nhận thu tiền">
+                                    <i class="fa-solid fa-credit-card me-1"></i>Thu tiền
+                                </button>
+                            ` : `
+                                <span class="badge bg-success-subtle text-success border border-success-subtle action-btn-fixed" title="Hóa đơn đã hoàn tất thanh toán">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Đã xong
+                                </span>
+                            `}
+                        </div>
                     </td>
                 </tr>
             `;
@@ -1713,10 +1812,34 @@ async function submitNewCustomer(e) {
 
 // 6. Báo Cáo Doanh Thu Chuyên Sâu (Executive Revenue Intelligence)
 let currentReportPeriod = 'all';
+let currentReportMonth = null;
+let currentReportQuarter = null;
+let currentReportYear = new Date().getFullYear();
 let currentReportView = 'ceo';
 let chartDailyInstance = null;
 let chartSourcesInstance = null;
 let currentReportData = null;
+
+function initReportDynamicLabels() {
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const curYear = now.getFullYear();
+    const curQuarter = Math.floor((curMonth - 1) / 3) + 1;
+
+    const btnThisMonth = document.getElementById('btn-period-this-month');
+    if (btnThisMonth) {
+        btnThisMonth.innerText = `Tháng này (T${curMonth}/${curYear})`;
+    }
+    const btnQuarter = document.getElementById('btn-period-quarter');
+    if (btnQuarter) {
+        btnQuarter.innerText = `Quý này (Q${curQuarter}/${curYear})`;
+    }
+
+    const selYear = document.getElementById('report-select-year');
+    if (selYear && !selYear.value) {
+        selYear.value = curYear.toString();
+    }
+}
 
 function switchReportView(mode) {
     currentReportView = mode;
@@ -1753,14 +1876,84 @@ function switchReportView(mode) {
 
 function changeReportPeriod(period, btn) {
     currentReportPeriod = period;
+    currentReportMonth = null;
+    currentReportQuarter = null;
+
+    // Đặt lại các dropdown tùy chọn về mặc định
+    const selMonth = document.getElementById('report-select-month');
+    const selQuarter = document.getElementById('report-select-quarter');
+    if (selMonth) selMonth.value = '';
+    if (selQuarter) selQuarter.value = '';
+
     document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
-    loadReports(period);
+    loadReports(period, null, null, currentReportYear);
 }
 
-async function loadReports(period = currentReportPeriod) {
+function onCustomMonthChange() {
+    const selMonth = document.getElementById('report-select-month');
+    const selQuarter = document.getElementById('report-select-quarter');
+    const selYear = document.getElementById('report-select-year');
+
+    if (selQuarter) selQuarter.value = ''; // Loại trừ nhau giữa Tháng và Quý
+
+    const m = selMonth && selMonth.value ? parseInt(selMonth.value) : null;
+    const y = selYear && selYear.value ? parseInt(selYear.value) : new Date().getFullYear();
+
+    currentReportPeriod = 'custom';
+    currentReportMonth = m;
+    currentReportQuarter = null;
+    currentReportYear = y;
+
+    document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+    loadReports('custom', m, null, y);
+}
+
+function onCustomQuarterChange() {
+    const selMonth = document.getElementById('report-select-month');
+    const selQuarter = document.getElementById('report-select-quarter');
+    const selYear = document.getElementById('report-select-year');
+
+    if (selMonth) selMonth.value = ''; // Loại trừ nhau giữa Tháng và Quý
+
+    const q = selQuarter && selQuarter.value ? parseInt(selQuarter.value) : null;
+    const y = selYear && selYear.value ? parseInt(selYear.value) : new Date().getFullYear();
+
+    currentReportPeriod = 'custom';
+    currentReportMonth = null;
+    currentReportQuarter = q;
+    currentReportYear = y;
+
+    document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+    loadReports('custom', null, q, y);
+}
+
+function onCustomYearChange() {
+    const selMonth = document.getElementById('report-select-month');
+    const selQuarter = document.getElementById('report-select-quarter');
+    const selYear = document.getElementById('report-select-year');
+
+    const m = selMonth && selMonth.value ? parseInt(selMonth.value) : null;
+    const q = selQuarter && selQuarter.value ? parseInt(selQuarter.value) : null;
+    const y = selYear && selYear.value ? parseInt(selYear.value) : new Date().getFullYear();
+
+    currentReportYear = y;
+    if (m || q) {
+        currentReportPeriod = 'custom';
+        document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+        loadReports('custom', m, q, y);
+    } else {
+        loadReports(currentReportPeriod, null, null, y);
+    }
+}
+
+function refreshCurrentReport() {
+    loadReports(currentReportPeriod, currentReportMonth, currentReportQuarter, currentReportYear);
+}
+
+async function loadReports(period = currentReportPeriod, month = currentReportMonth, quarter = currentReportQuarter, year = currentReportYear) {
     try {
-        const data = await StatsAPI.getDetailedReport(period);
+        const data = await StatsAPI.getDetailedReport(period, month, quarter, year);
         currentReportData = data;
         const kpi = data.kpi;
         const dongTien = data.dong_tien;
@@ -2037,39 +2230,143 @@ function applyDynamicPricing() {
 }
 
 // 7. Quản trị Nhân sự & Tài khoản (Dành cho Quản lý)
+let allStaffList = [];
+
 async function loadStaff() {
     try {
         const staff = await AuthAPI.getStaffList();
-        const tbody = document.getElementById('staff-table-body');
-        if (!tbody) return;
-        if (!staff || !staff.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu nhân viên.</td></tr>';
-            return;
-        }
+        allStaffList = Array.isArray(staff) ? staff : [];
 
-        tbody.innerHTML = staff.map(s => {
-            const isMgr = s.chuc_vu && s.chuc_vu.toLowerCase().includes('quản lý');
-            const roleBadge = isMgr 
-                ? '<span class="badge bg-danger"><i class="fa-solid fa-shield-halved me-1"></i>Toàn quyền Quản lý</span>' 
-                : '<span class="badge bg-primary"><i class="fa-solid fa-bell-concierge me-1"></i>Nghiệp vụ Lễ tân</span>';
-            const statusBadge = s.trang_thai === 'Hoạt động' 
-                ? '<span class="badge bg-success">Hoạt động</span>' 
-                : `<span class="badge bg-warning text-dark">${s.trang_thai}</span>`;
+        // Tự động lấy danh sách chức vụ thực tế từ CSDL để nạp vào dropdown
+        populateStaffRoleFilter(allStaffList);
 
-            return `
-                <tr>
-                    <td class="fw-bold text-primary">${s.ma_nv}</td>
-                    <td class="fw-semibold">${s.ho_ten}</td>
-                    <td><code>${s.username}</code></td>
-                    <td><span class="badge ${isMgr ? 'bg-danger' : 'bg-secondary'}">${s.chuc_vu}</span></td>
-                    <td>${statusBadge}</td>
-                    <td>${roleBadge}</td>
-                </tr>
-            `;
-        }).join('');
+        // Render danh sách theo bộ lọc hiện tại
+        applyStaffFilters();
     } catch (err) {
-        Swal.fire('Lỗi', err.message, 'error');
+        Swal.fire('Lỗi nạp nhân sự', err.message, 'error');
     }
+}
+
+function populateStaffRoleFilter(staffList) {
+    const select = document.getElementById('staff-role-filter');
+    if (!select) return;
+
+    const currentVal = select.value;
+    const rolesMap = {};
+    staffList.forEach(s => {
+        if (s.chuc_vu) {
+            const role = s.chuc_vu.trim();
+            rolesMap[role] = (rolesMap[role] || 0) + 1;
+        }
+    });
+
+    const hierarchy = { "Quản lý": 1, "Kế toán": 2, "Lễ tân": 3, "Buồng phòng": 4, "Bảo vệ": 5 };
+    const roles = Object.keys(rolesMap).sort((a, b) => (hierarchy[a] || 99) - (hierarchy[b] || 99));
+
+    select.innerHTML = '<option value="">-- Tất cả chức vụ --</option>' + 
+        roles.map(r => `<option value="${r}">${r} (${rolesMap[r]})</option>`).join('');
+
+    if (currentVal && roles.includes(currentVal)) {
+        select.value = currentVal;
+    }
+}
+
+function applyStaffFilters() {
+    const searchInput = document.getElementById('staff-search-input');
+    const roleFilter = document.getElementById('staff-role-filter');
+    const tbody = document.getElementById('staff-table-body');
+    const countBadge = document.getElementById('staff-count-badge');
+    if (!tbody) return;
+
+    const kw = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const selRole = roleFilter ? roleFilter.value.trim() : '';
+
+    const filtered = allStaffList.filter(s => {
+        if (kw) {
+            const matchName = s.ho_ten && s.ho_ten.toLowerCase().includes(kw);
+            const matchCode = s.ma_nv && s.ma_nv.toLowerCase().includes(kw);
+            const matchUser = s.username && s.username.toLowerCase().includes(kw);
+            if (!matchName && !matchCode && !matchUser) return false;
+        }
+        if (selRole) {
+            if (s.chuc_vu !== selRole) return false;
+        }
+        return true;
+    });
+
+    if (countBadge) {
+        countBadge.innerText = `Hiển thị: ${filtered.length}/${allStaffList.length} NV`;
+    }
+
+    if (!filtered.length) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-user-slash text-secondary fa-2x mb-2 d-block"></i>
+                    <div class="fw-bold fs-6">Không tìm thấy nhân viên nào phù hợp</div>
+                    <div class="small">Vui lòng kiểm tra lại từ khóa tìm kiếm hoặc chọn chức vụ khác.</div>
+                    <button class="btn btn-sm btn-outline-primary mt-3" onclick="clearStaffFilters()">
+                        <i class="fa-solid fa-arrow-rotate-left me-1"></i>Xóa điều kiện tìm kiếm
+                    </button>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(s => {
+        const isMgr = s.chuc_vu && s.chuc_vu.toLowerCase().includes('quản lý');
+        const isKeToan = s.chuc_vu && s.chuc_vu.toLowerCase().includes('kế toán');
+        const isLeTan = s.chuc_vu && s.chuc_vu.toLowerCase().includes('lễ tân');
+        const isBuongPhong = s.chuc_vu && s.chuc_vu.toLowerCase().includes('buồng phòng');
+        const isBaoVe = s.chuc_vu && s.chuc_vu.toLowerCase().includes('bảo vệ');
+
+        let roleBadgeClass = 'bg-secondary';
+        let roleIcon = 'fa-user';
+        if (isMgr) { roleBadgeClass = 'bg-danger'; roleIcon = 'fa-crown'; }
+        else if (isKeToan) { roleBadgeClass = 'bg-info text-dark'; roleIcon = 'fa-calculator'; }
+        else if (isLeTan) { roleBadgeClass = 'bg-primary'; roleIcon = 'fa-bell-concierge'; }
+        else if (isBuongPhong) { roleBadgeClass = 'bg-success'; roleIcon = 'fa-broom'; }
+        else if (isBaoVe) { roleBadgeClass = 'bg-dark'; roleIcon = 'fa-shield'; }
+
+        let permBadge = '<span class="badge bg-secondary">Nhân viên Khách sạn</span>';
+        if (isMgr) permBadge = '<span class="badge bg-danger"><i class="fa-solid fa-shield-halved me-1"></i>Toàn quyền Quản lý</span>';
+        else if (isKeToan) permBadge = '<span class="badge bg-info text-dark"><i class="fa-solid fa-file-invoice-dollar me-1"></i>Nghiệp vụ Kế toán</span>';
+        else if (isLeTan) permBadge = '<span class="badge bg-primary"><i class="fa-solid fa-bell-concierge me-1"></i>Nghiệp vụ Lễ tân</span>';
+        else if (isBuongPhong) permBadge = '<span class="badge bg-success"><i class="fa-solid fa-spray-can me-1"></i>Nghiệp vụ Buồng phòng</span>';
+        else if (isBaoVe) permBadge = '<span class="badge bg-dark"><i class="fa-solid fa-person-military-pointing me-1"></i>Nghiệp vụ An ninh</span>';
+
+        let statusBadge = '<span class="badge bg-light text-muted border">Đang công tác</span>';
+        if (s.trang_thai === 'Hoạt động') statusBadge = '<span class="badge bg-success">Hoạt động</span>';
+        else if (s.trang_thai === 'Khóa') statusBadge = '<span class="badge bg-warning text-dark">Khóa</span>';
+
+        const usernameDisplay = s.username && s.username !== '—' 
+            ? `<code>${s.username}</code>` 
+            : '<span class="text-muted fst-italic">—</span>';
+
+        return `
+            <tr>
+                <td class="fw-bold text-primary">${s.ma_nv}</td>
+                <td class="fw-semibold text-dark">${s.ho_ten}</td>
+                <td>${usernameDisplay}</td>
+                <td>
+                    <span class="badge ${roleBadgeClass}">
+                        <i class="fa-solid ${roleIcon} me-1"></i>${s.chuc_vu}
+                    </span>
+                </td>
+                <td>${statusBadge}</td>
+                <td>${permBadge}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function clearStaffFilters() {
+    const searchInput = document.getElementById('staff-search-input');
+    const roleFilter = document.getElementById('staff-role-filter');
+    if (searchInput) searchInput.value = '';
+    if (roleFilter) roleFilter.value = '';
+    applyStaffFilters();
 }
 
 function logout() {

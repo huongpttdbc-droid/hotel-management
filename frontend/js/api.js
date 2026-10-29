@@ -60,7 +60,13 @@ const AuthAPI = {
             body: JSON.stringify({ username, password })
         });
     },
-    getStaffList: () => apiRequest('/auth/staff-list'),
+    getStaffList: (keyword = '', chucVu = '') => {
+        const params = new URLSearchParams();
+        if (keyword) params.append('keyword', keyword);
+        if (chucVu) params.append('chuc_vu', chucVu);
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        return apiRequest(`/auth/staff-list${qs}`);
+    },
     getMe: () => apiRequest('/auth/me')
 };
 
@@ -144,7 +150,13 @@ const InvoiceAPI = {
 // 6. Thống kê
 const StatsAPI = {
     getSummary: () => apiRequest('/thong-ke/tong-quan'),
-    getDetailedReport: (period = 'all') => apiRequest(`/thong-ke/doanh-thu-chi-tiet?period=${encodeURIComponent(period)}`)
+    getDetailedReport: (period = 'all', month = null, quarter = null, year = null) => {
+        let url = `/thong-ke/doanh-thu-chi-tiet?period=${encodeURIComponent(period)}`;
+        if (month) url += `&month=${encodeURIComponent(month)}`;
+        if (quarter) url += `&quarter=${encodeURIComponent(quarter)}`;
+        if (year) url += `&year=${encodeURIComponent(year)}`;
+        return apiRequest(url);
+    }
 };
 
 // Gắn trực tiếp lên window để đảm bảo tương thích mọi môi trường và tránh lỗi undefined

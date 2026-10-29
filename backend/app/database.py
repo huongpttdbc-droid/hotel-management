@@ -9,10 +9,13 @@ logger = logging.getLogger("uvicorn.error")
 
 DATABASE_URL = settings.DATABASE_URL
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+FALLBACK_DB_PATH = os.path.join(BASE_DIR, "hotel_fallback.db").replace("\\", "/")
+
 # Tự động phát hiện môi trường Cloud (Render/Linux) hoặc khi không thể kết nối SQL Server localhost
 is_cloud = bool(os.getenv("RENDER") or os.getenv("PORT") or sys.platform != "win32" or settings.ENVIRONMENT == "production")
 if is_cloud and ("localhost" in DATABASE_URL or "SQLEXPRESS" in DATABASE_URL or "127.0.0.1" in DATABASE_URL):
-    DATABASE_URL = "sqlite:///./hotel_fallback.db"
+    DATABASE_URL = f"sqlite:///{FALLBACK_DB_PATH}"
 
 # Cấu hình engine linh hoạt cho MSSQL, PostgreSQL hoặc SQLite
 connect_args = {}
@@ -33,7 +36,7 @@ try:
         logger.info(f"Kết nối cơ sở dữ liệu thành công: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else 'Local SQL Server'}")
 except Exception as e:
     logger.warning(f"Không thể kết nối SQL Server ({e}). Chuyển sang dùng SQLite dự phòng cho môi trường Cloud/Offline...")
-    DATABASE_URL = "sqlite:///./hotel_fallback.db"
+    DATABASE_URL = f"sqlite:///{FALLBACK_DB_PATH}"
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -267,6 +267,50 @@ class TestHotelManagementSystem(unittest.TestCase):
         self.assertGreater(data["tong_khach_hang"], 0)
         self.assertGreaterEqual(data["doanh_thu_thang"], 0)
 
+    def test_19_staff_hierarchy_and_filtering(self):
+        # Kiểm tra sắp xếp thứ bậc chức vụ
+        res = client.get("/api/auth/staff-list")
+        self.assertEqual(res.status_code, 200)
+        staffs = res.json()
+        self.assertGreaterEqual(len(staffs), 20)
+        roles = [s["chuc_vu"] for s in staffs]
+        self.assertEqual(roles[0], "Quản lý")
+        self.assertEqual(roles[1], "Quản lý")
+        self.assertEqual(roles[2], "Kế toán")
+        self.assertEqual(roles[3], "Kế toán")
+        self.assertEqual(roles[4], "Lễ tân")
+        self.assertEqual(roles[-1], "Bảo vệ")
+
+        # Kiểm tra lọc theo từ khóa
+        res_kw = client.get("/api/auth/staff-list?keyword=Hoa")
+        self.assertEqual(res_kw.status_code, 200)
+        self.assertTrue(any(s["ma_nv"] == "NV01" for s in res_kw.json()))
+
+        # Kiểm tra lọc theo chức vụ
+        res_role = client.get("/api/auth/staff-list?chuc_vu=Kế toán")
+        self.assertEqual(res_role.status_code, 200)
+        self.assertEqual(len(res_role.json()), 2)
+
+    def test_20_dynamic_revenue_reporting(self):
+        # Báo cáo động theo Tháng và Năm
+        res_m = client.get("/api/thong-ke/doanh-thu-chi-tiet?month=7&year=2026")
+        self.assertEqual(res_m.status_code, 200)
+        data_m = res_m.json()
+        self.assertIn("kpi", data_m)
+        self.assertEqual(data_m["kpi"]["so_hoa_don_da_thu"], 9)
+        self.assertGreater(data_m["kpi"]["tong_doanh_thu"], 0)
+
+        # Báo cáo động theo Quý và Năm
+        res_q = client.get("/api/thong-ke/doanh-thu-chi-tiet?quarter=3&year=2026")
+        self.assertEqual(res_q.status_code, 200)
+        data_q = res_q.json()
+        self.assertEqual(data_q["kpi"]["so_hoa_don_da_thu"], 27)
+
+    def test_21_swagger_docs_accessible(self):
+        # Đảm bảo route /docs vẫn hoạt động bình thường ở backend
+        res = client.get("/docs")
+        self.assertEqual(res.status_code, 200)
+
 if __name__ == "__main__":
     unittest.main()
 

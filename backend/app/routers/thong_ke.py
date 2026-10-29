@@ -38,18 +38,37 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
 
 @router.get("/doanh-thu-chi-tiet")
 def get_detailed_revenue_report(
-    period: Optional[str] = Query("all", description="Kỳ báo cáo: today, 7days, thisMonth, quarter, all"),
+    period: Optional[str] = Query("all", description="Kỳ báo cáo: today, 7days, thisMonth, quarter, all, custom"),
+    month: Optional[int] = Query(None, description="Tháng cần xem (1-12)"),
+    quarter: Optional[int] = Query(None, description="Quý cần xem (1-4)"),
+    year: Optional[int] = Query(None, description="Năm cần xem (ví dụ 2026)"),
     db: Session = Depends(get_db)
 ):
     """
     Báo cáo quản trị doanh thu chuyên sâu chuẩn ngành Khách Sạn (Hospitality Revenue Management):
     - 6 KPI cốt lõi: Total Revenue, Room Revenue, F&B/Services, RevPAR, ADR, Occupancy Rate (%)
+    - Hỗ trợ lọc động theo Tháng, Quý, Năm hoặc các kỳ nhanh (Hôm nay, 7 ngày qua, Tháng này, Quý này, Toàn bộ)
     - Dòng tiền thực thu vs Chờ thanh toán (Cash Flow & Receivables)
     - Cơ cấu nguồn thu (Donut Chart Data)
     - Diễn biến doanh thu & công suất theo ngày (Daily Combo Chart Data)
     - Hiệu suất chi tiết theo 5 hạng phòng (Room Performance Table)
     - Khuyến nghị tối ưu doanh thu (Yield & Dynamic Pricing Insights)
     """
+    # Chuẩn hóa tham số an toàn (tương thích cả HTTP request FastAPI và gọi hàm trực tiếp)
+    period_str = str(period.default if hasattr(period, "default") else (period or "all"))
+    m_val = None
+    if month is not None and not hasattr(month, "default"):
+        try: m_val = int(month)
+        except (ValueError, TypeError): m_val = None
+    q_val = None
+    if quarter is not None and not hasattr(quarter, "default"):
+        try: q_val = int(quarter)
+        except (ValueError, TypeError): q_val = None
+    y_val = None
+    if year is not None and not hasattr(year, "default"):
+        try: y_val = int(year)
+        except (ValueError, TypeError): y_val = None
+
     now = datetime.now()
     today = date.today()
 
@@ -66,15 +85,29 @@ def get_detailed_revenue_report(
 
     def filter_by_period(inv: HoaDon) -> bool:
         if not inv.NgayLap:
-            return period == "all"
+            return period_str == "all" and not (m_val or q_val or y_val)
         inv_dt = inv.NgayLap
-        if period == "today":
+
+        # Ưu tiên bộ lọc động theo Năm, Tháng, Quý nếu được truyền vào
+        if y_val and inv_dt.year != y_val:
+            return False
+        if m_val and inv_dt.month != m_val:
+            return False
+        if q_val:
+            inv_quarter = (inv_dt.month - 1) // 3 + 1
+            if inv_quarter != q_val:
+                return False
+        if m_val or q_val or (y_val and period_str not in ["today", "7days"]):
+            return True
+
+        # Bộ lọc nhanh theo nhãn thời gian tương đối
+        if period_str == "today":
             return inv_dt.date() == today
-        elif period == "7days":
+        elif period_str == "7days":
             return inv_dt >= (now - timedelta(days=7))
-        elif period == "thisMonth":
+        elif period_str == "thisMonth":
             return inv_dt.year == now.year and inv_dt.month == now.month
-        elif period == "quarter":
+        elif period_str == "quarter":
             current_quarter = (now.month - 1) // 3 + 1
             inv_quarter = (inv_dt.month - 1) // 3 + 1
             return inv_dt.year == now.year and inv_quarter == current_quarter
@@ -212,7 +245,7 @@ def get_detailed_revenue_report(
     )
 
     return {
-        "period": period,
+        "period": period_str,
         "kpi": {
             "tong_doanh_thu": round(tot_revenue),
             "doanh_thu_phong": round(tot_room),

@@ -51,20 +51,79 @@ def verify_password(plain_password: str, db_hash: str, salt: str = None) -> bool
     hashed_direct = hashlib.sha256(p.encode("utf-8")).hexdigest().upper()
     return hashed_direct == (db_hash or "").upper()
 
+# Cấu hình thứ tự ưu tiên chức vụ trong khách sạn (từ cấp cao nhất xuống cấp cơ sở)
+ROLE_HIERARCHY = {
+    "Quản lý": 1,
+    "Kế toán": 2,
+    "Lễ tân": 3,
+    "Buồng phòng": 4,
+    "Bảo vệ": 5
+}
+
 @router.get("/staff-list")
-def list_staff_accounts(db: Session = Depends(get_db)):
-    """Trả về danh sách tài khoản nhân viên / lễ tân để chọn đăng nhập nhanh trên giao diện"""
-    tks = db.query(TaiKhoan).all()
+def list_staff_accounts(
+    keyword: Optional[str] = None,
+    chuc_vu: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Trả về danh sách toàn bộ nhân sự khách sạn:
+    - Sắp xếp theo thứ bậc chức vụ từ cao xuống thấp (Quản lý -> Kế toán -> Lễ tân -> Buồng phòng -> Bảo vệ)
+    - Cùng chức vụ sắp xếp tiếp theo Mã nhân viên (MaNV)
+    - Hỗ trợ tìm kiếm theo tên / mã NV và lọc theo chức vụ thực tế
+    """
+    # 1. Truy vấn toàn bộ nhân viên thực tế từ bảng NhanVien
+    nvs = db.query(NhanVien).all()
+
+    # 2. Truy vấn tài khoản hệ thống tương ứng
+    tks = {tk.MaNV: tk for tk in db.query(TaiKhoan).all()}
+
     results = []
-    for tk in tks:
-        nv = db.query(NhanVien).filter(NhanVien.MaNV == tk.MaNV).first()
-        results.append({
-            "username": tk.TenDangNhap,
-            "ma_nv": tk.MaNV,
-            "ho_ten": nv.HoTen if nv else tk.TenDangNhap,
-            "chuc_vu": nv.ChucVu if nv else "Nhân viên",
-            "trang_thai": tk.TrangThai
-        })
+    for nv in nvs:
+        tk = tks.get(nv.MaNV)
+        role_name = (nv.ChucVu or "Nhân viên").strip()
+        role_order = ROLE_HIERARCHY.get(role_name, 99)
+
+        # Xác định phân quyền hệ thống tương ứng
+        if "Quản lý" in role_name:
+            phan_quyen = "Toàn quyền Quản lý"
+        elif "Kế toán" in role_name:
+            phan_quyen = "Nghiệp vụ Kế toán"
+        elif "Lễ tân" in role_name:
+            phan_quyen = "Nghiệp vụ Lễ tân"
+        elif "Buồng phòng" in role_name:
+            phan_quyen = "Nghiệp vụ Buồng phòng"
+        elif "Bảo vệ" in role_name:
+            phan_quyen = "Nghiệp vụ An ninh"
+        else:
+            phan_quyen = "Nhân viên Khách sạn"
+
+        item = {
+            "ma_nv": nv.MaNV,
+            "ho_ten": nv.HoTen,
+            "chuc_vu": role_name,
+            "chuc_vu_order": role_order,
+            "username": tk.TenDangNhap if tk else "—",
+            "trang_thai": tk.TrangThai if tk else "Đang công tác",
+            "has_account": bool(tk),
+            "phan_quyen": phan_quyen
+        }
+
+        # Lọc theo từ khóa (Mã NV, Họ tên, Tên đăng nhập)
+        if keyword:
+            kw = keyword.strip().lower()
+            if kw not in item["ma_nv"].lower() and kw not in item["ho_ten"].lower() and kw not in item["username"].lower():
+                continue
+
+        # Lọc theo chức vụ
+        if chuc_vu and chuc_vu.strip():
+            if item["chuc_vu"].lower() != chuc_vu.strip().lower():
+                continue
+
+        results.append(item)
+
+    # 3. Sắp xếp danh sách: Cấp bậc chức vụ từ cao xuống thấp (1 -> 5), cùng chức vụ xếp theo Mã NV
+    results.sort(key=lambda x: (x["chuc_vu_order"], x["ma_nv"]))
     return results
 
 @router.post("/login", response_model=TokenResponse)
