@@ -33,9 +33,47 @@ app.include_router(dich_vu.router, prefix=settings.API_V1_STR)
 app.include_router(hoa_don.router, prefix=settings.API_V1_STR)
 app.include_router(thong_ke.router, prefix=settings.API_V1_STR)
 
+from backend.app.database import DATABASE_URL, engine
+
+@app.on_event("startup")
+def on_startup():
+    try:
+        from backend.app.database import Base
+        import backend.app.models  # Nạp toàn bộ models để tạo bảng tự động nếu là DB mới
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print("Startup metadata create_all notice:", e)
+
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "app": settings.PROJECT_NAME, "version": settings.VERSION}
+    url_lower = DATABASE_URL.lower()
+    is_sqlite = "sqlite" in url_lower
+    is_postgres = "postgres" in url_lower
+    is_mssql = "mssql" in url_lower
+
+    if is_sqlite:
+        db_type = "SQLite Fallback (hotel_fallback.db)"
+        server_info = "Local SQLite"
+    elif is_postgres:
+        db_type = "PostgreSQL (Cloud / Supabase / Neon / Render)"
+        server_info = DATABASE_URL.split("@")[-1].split("?")[0] if "@" in DATABASE_URL else "PostgreSQL Cloud"
+    elif is_mssql:
+        db_type = "Microsoft SQL Server"
+        server_info = DATABASE_URL.split("@")[-1].split("?")[0] if "@" in DATABASE_URL else "Local SQL Server"
+    else:
+        db_type = "Database Engine"
+        server_info = DATABASE_URL.split("@")[-1].split("?")[0] if "@" in DATABASE_URL else "Unknown"
+
+    return {
+        "status": "ok",
+        "app": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "database": {
+            "type": db_type,
+            "server": server_info,
+            "is_sqlite_fallback": is_sqlite
+        }
+    }
 
 # Phục vụ thư mục Frontend (HTML, CSS, JS, Ảnh) trực tiếp tại máy và Render
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "..", "frontend")
