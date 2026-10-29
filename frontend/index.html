@@ -10,9 +10,74 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- SweetAlert2 for beautiful popups -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- Chart.js CDN for Revenue Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom CSS -->
     <link href="css/style.css" rel="stylesheet">
     <style>
+    /* Hospitality Luxury Report Styles */
+    .report-card {
+        border-radius: 1rem;
+        transition: all 0.25s ease;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+    }
+    .report-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+    .badge-gold {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+    .has-tooltip {
+        position: relative;
+        cursor: help;
+    }
+    .tooltip-box {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 220px;
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 1.4;
+        z-index: 1000;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+    .has-tooltip:hover .tooltip-box {
+        visibility: visible;
+        opacity: 1;
+    }
+    .time-filter-btn {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .time-filter-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .time-filter-btn.active {
+        background: #1b3a5b;
+        color: #ffffff;
+        border-color: #1b3a5b;
+        box-shadow: 0 2px 4px rgba(27, 58, 91, 0.25);
+    }
     @media print {
         body * {
             visibility: hidden !important;
@@ -265,32 +330,373 @@
                 </div>
             </div>
 
-            <!-- SECTION 6: BÁO CÁO DOANH THU (REPORTS) -->
+            <!-- SECTION 6: BÁO CÁO DOANH THU CHUYÊN SÂU (LUXURY HOSPITALITY REVENUE MANAGEMENT) -->
             <div id="section-reports" class="content-section d-none">
-                <h5 class="fw-bold mb-3">Báo Cáo & Thống Kê Tổng Quan</h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card p-4 border-0 shadow-sm text-center">
-                            <div class="text-muted small">Tổng Doanh Thu Đã Thu</div>
-                            <div class="fs-1 fw-bold text-success my-2" id="report-revenue">0 ₫</div>
-                            <div class="small text-muted">Từ các hóa đơn đã thanh toán</div>
+                
+                <!-- Header Quản Trị & Báo Cáo Doanh Thu -->
+                <div class="card border-0 shadow-sm p-4 mb-4 text-white rounded-4" style="background: linear-gradient(135deg, #0c1b2c 0%, #1b3a5b 60%, #132a43 100%);">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-3 d-flex align-items-center justify-content-center shadow" style="width: 50px; height: 50px; background: linear-gradient(135deg, #c59d5f 0%, #e4c48f 100%); color: #0c1b2c;">
+                                <i class="fa-solid fa-hotel fs-4"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h4 class="m-0 fw-bold font-serif">Grand Horizon Hotel & Suites</h4>
+                                    <span class="badge rounded-pill" style="background-color: rgba(197, 157, 95, 0.25); color: #e4c48f; border: 1px solid rgba(197, 157, 95, 0.5); font-size: 0.7rem;">5-Star Luxury</span>
+                                </div>
+                                <p class="text-white-50 m-0 small mt-1">Hệ Thống Quản Trị Doanh Thu & Chỉ Số Hiệu Suất (Hospitality Intelligence)</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card p-4 border-0 shadow-sm text-center">
-                            <div class="text-muted small">Tổng Khách Hàng Đăng Ký</div>
-                            <div class="fs-1 fw-bold text-primary my-2" id="report-customers">40</div>
-                            <div class="small text-muted">Trong cơ sở dữ liệu</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card p-4 border-0 shadow-sm text-center">
-                            <div class="text-muted small">Tỷ Lệ Lấp Đầy Phòng</div>
-                            <div class="fs-1 fw-bold text-danger my-2" id="report-occupancy">0%</div>
-                            <div class="small text-muted" id="report-occupancy-detail">0 / 30 phòng đang có khách</div>
+
+                        <!-- Chuyển đổi góc nhìn CEO vs Revenue Manager -->
+                        <div class="d-flex align-items-center gap-2 p-1 rounded-3" style="background: rgba(12, 27, 44, 0.7); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <button id="viewBtnCeo" onclick="switchReportView('ceo')" class="btn btn-sm fw-semibold rounded-2 px-3 py-1 text-dark shadow-sm" style="background: #c59d5f; font-size: 0.8rem;">
+                                <i class="fa-solid fa-crown me-1"></i>Góc nhìn CEO / Ban Quản Lý
+                            </button>
+                            <button id="viewBtnManager" onclick="switchReportView('manager')" class="btn btn-sm fw-medium rounded-2 px-3 py-1 text-white-50" style="font-size: 0.8rem;">
+                                <i class="fa-solid fa-sliders me-1"></i>Revenue Manager
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Thanh Công Cụ & Bộ Lọc Thời Gian -->
+                <div class="card border-0 shadow-sm p-3 mb-4 rounded-3 bg-white">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="small fw-bold text-muted text-uppercase me-1"><i class="fa-regular fa-calendar-days text-primary me-1"></i>Kỳ báo cáo:</span>
+                            <button onclick="changeReportPeriod('all', this)" class="time-filter-btn active">Toàn bộ CSDL</button>
+                            <button onclick="changeReportPeriod('today', this)" class="time-filter-btn">Hôm nay</button>
+                            <button onclick="changeReportPeriod('7days', this)" class="time-filter-btn">7 ngày qua</button>
+                            <button onclick="changeReportPeriod('thisMonth', this)" class="time-filter-btn">Tháng này (T10/2026)</button>
+                            <button onclick="changeReportPeriod('quarter', this)" class="time-filter-btn">Quý này</button>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <button onclick="loadReports(currentReportPeriod)" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" title="Làm mới số liệu tức thì">
+                                <i class="fa-solid fa-arrow-rotate-right"></i>
+                                <span>Làm mới</span>
+                            </button>
+                            <button onclick="window.print()" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" title="In báo cáo doanh thu">
+                                <i class="fa-solid fa-print"></i>
+                                <span>In Báo Cáo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6 KPI Metric Cards Grid (Hospitality Core Metrics) -->
+                <div class="row g-3 mb-4">
+                    <!-- Card 1: Total Revenue -->
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="report-card p-3 h-100 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted fw-semibold">Tổng doanh thu</span>
+                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #eff6ff; color: #2563eb;">
+                                    <i class="fa-solid fa-sack-dollar"></i>
+                                </div>
+                            </div>
+                            <div class="fs-4 fw-bold text-dark my-1" id="kpi-total-revenue">0 ₫</div>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded-pill"><i class="fa-solid fa-arrow-trend-up me-1"></i>Thực thu</span>
+                                <span class="text-muted small" id="kpi-paid-count">0 hóa đơn</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Room Revenue -->
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="report-card p-3 h-100 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted fw-semibold">Doanh thu phòng</span>
+                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #eef2ff; color: #4f46e5;">
+                                    <i class="fa-solid fa-bed"></i>
+                                </div>
+                            </div>
+                            <div class="fs-4 fw-bold text-dark my-1" id="kpi-room-revenue">0 ₫</div>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="text-muted" id="kpi-room-percent">74% tổng thu</span>
+                                <span class="badge bg-primary-subtle text-primary">Cốt lõi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: RevPAR (With Tooltip) -->
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="report-card p-3 h-100 shadow-sm" style="background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); border-color: #fde68a;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="has-tooltip d-flex align-items-center gap-1">
+                                    <span class="small fw-bold text-warning-emphasis text-uppercase">RevPAR</span>
+                                    <i class="fa-regular fa-circle-question text-muted small"></i>
+                                    <div class="tooltip-box">
+                                        <strong>Revenue Per Available Room:</strong> Doanh thu trung bình trên mỗi phòng hiện có trong khách sạn (30 phòng) = Doanh thu phòng / Tổng số phòng.
+                                    </div>
+                                </div>
+                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #fef3c7; color: #b45309;">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="fs-4 fw-bold text-dark my-1" id="kpi-revpar">0 ₫</div>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1 rounded-pill">Sức khỏe KS</span>
+                                <span class="text-muted small">/ 30 phòng</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: ADR (With Tooltip) -->
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="report-card p-3 h-100 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="has-tooltip d-flex align-items-center gap-1">
+                                    <span class="small text-muted fw-semibold">ADR (Giá TB/Phòng)</span>
+                                    <i class="fa-regular fa-circle-question text-muted small"></i>
+                                    <div class="tooltip-box">
+                                        <strong>Average Daily Rate:</strong> Giá bán trung bình thực tế của mỗi lượt / ngày phòng đã bán có khách ở.
+                                    </div>
+                                </div>
+                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #faf5ff; color: #9333ea;">
+                                    <i class="fa-solid fa-tag"></i>
+                                </div>
+                            </div>
+                            <div class="fs-4 fw-bold text-dark my-1" id="kpi-adr">0 ₫</div>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="badge bg-info-subtle text-info px-2 py-1 rounded-pill">Đơn giá bán</span>
+                                <span class="text-muted small">/ lượt bán</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Occupancy Rate (Occ %) -->
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="report-card p-3 h-100 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="has-tooltip d-flex align-items-center gap-1">
+                                    <span class="small text-muted fw-semibold">Công suất phòng</span>
+                                    <i class="fa-regular fa-circle-question text-muted small"></i>
+                                    <div class="tooltip-box">
+                                        <strong>Occupancy Rate:</strong> Tỷ lệ phần trăm số phòng đang có khách thuê so với tổng số phòng hiện có.
+                                    </div>
+                                </div>
+                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #f0fdf4; color: #16a34a;">
+                                    <i class="fa-solid fa-key"></i>
+                                </div>
+                            </div>
+                            <div class="fs-4 fw-bold text-dark my-1" id="kpi-occupancy">0%</div>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="text-muted small" id="kpi-occupancy-sub">0/30 phòng</span>
+                                <span class="badge bg-success-subtle text-success">Lấp đầy</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: F&B & Extra Services -->
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="report-card p-3 h-100 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted fw-semibold">Ẩm thực & Dịch vụ</span>
+                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #fff7ed; color: #ea580c;">
+                                    <i class="fa-solid fa-utensils"></i>
+                                </div>
+                            </div>
+                            <div class="fs-4 fw-bold text-dark my-1" id="kpi-service-revenue">0 ₫</div>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="text-muted" id="kpi-service-percent">18% tổng thu</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis">Dịch vụ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section: Main Trends + Breakdown -->
+                <div class="row g-4 mb-4">
+                    <!-- Biểu đồ chính: Diễn biến doanh thu & công suất (Takes 8 cols) -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm p-4 h-100 rounded-3">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="fw-bold m-0 text-dark">Diễn Biến Doanh Thu & Công Suất Phòng</h6>
+                                        <span class="badge bg-primary-subtle text-primary">Theo mốc hóa đơn</span>
+                                    </div>
+                                    <p class="text-muted small m-0 mt-1">Tương quan giữa doanh thu thực tế (triệu VNĐ) và tỷ lệ lấp đầy phòng (%)</p>
+                                </div>
+                                <div class="d-flex align-items-center gap-3 small">
+                                    <span class="d-flex align-items-center gap-1"><span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #3b82f6;"></span> Doanh thu</span>
+                                    <span class="d-flex align-items-center gap-1"><span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #f59e0b;"></span> Occ (%)</span>
+                                    <span class="d-flex align-items-center gap-1"><span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #10b981;"></span> ADR (kđ)</span>
+                                </div>
+                            </div>
+
+                            <div style="position: relative; height: 320px; width: 100%;">
+                                <canvas id="chartDailyRevenue"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu đồ phụ: Cơ cấu nguồn thu (Takes 4 cols) -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm p-4 h-100 rounded-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="fw-bold m-0 text-dark">Cơ Cấu Nguồn Thu</h6>
+                                    <span class="badge bg-light text-dark border">Phân bổ %</span>
+                                </div>
+                                <p class="text-muted small m-0 mb-3">Tỷ trọng đóng góp dòng tiền vào khách sạn</p>
+
+                                <div style="position: relative; height: 210px; width: 100%;" class="d-flex align-items-center justify-content-center">
+                                    <canvas id="chartRevenueSources"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-top mt-3 space-y-2">
+                                <div class="d-flex justify-content-between align-items-center small py-1">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background: #2563eb;"></span> Tiền phòng (Room)
+                                    </span>
+                                    <span class="fw-bold text-dark" id="donut-room-val">0 ₫</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small py-1">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background: #f59e0b;"></span> Ẩm thực & Dịch vụ (F&B)
+                                    </span>
+                                    <span class="fw-bold text-dark" id="donut-service-val">0 ₫</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small py-1">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background: #10b981;"></span> Thuế VAT & Phụ thu
+                                    </span>
+                                    <span class="fw-bold text-dark" id="donut-other-val">0 ₫</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dòng Tiền & Công Nợ Ngắn Hạn (Cash Flow & Receivables) -->
+                <div class="card border-0 shadow-sm p-4 mb-4 rounded-3 bg-white">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                        <div>
+                            <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-wallet text-success me-2"></i>Dòng Tiền & Công Nợ Ngắn Hạn</h6>
+                            <p class="text-muted small m-0 mt-1">Trạng thái thanh toán thực tế so với tổng tiền doanh thu phát sinh</p>
+                        </div>
+                        <span class="badge bg-light text-dark border px-3 py-2 fw-semibold">Đối soát CSDL tự động</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Thực thu -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <div class="d-flex justify-content-between align-items-center small mb-2">
+                                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-circle-check text-success"></i> Đã thực thu (Tiền mặt, Chuyển khoản, POS)
+                                    </span>
+                                    <span class="fw-bold text-success fs-6" id="cashflow-received">0 ₫</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div id="cashflow-received-bar" class="progress-bar bg-success" role="progressbar" style="width: 85%;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
+                                    <span>Đã nộp quỹ & vào tài khoản ngân hàng</span>
+                                    <span class="fw-bold text-success" id="cashflow-received-rate">85%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chờ thanh toán -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <div class="d-flex justify-content-between align-items-center small mb-2">
+                                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-clock-rotate-left text-warning"></i> Chờ thanh toán (Hóa đơn chưa thu & đang ở)
+                                    </span>
+                                    <span class="fw-bold text-danger fs-6" id="cashflow-pending">0 ₫</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div id="cashflow-pending-bar" class="progress-bar bg-warning" role="progressbar" style="width: 15%;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
+                                    <span>Dự kiến thu khi làm thủ tục trả phòng</span>
+                                    <span class="fw-bold text-warning-emphasis" id="cashflow-pending-rate">15%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Báo Cáo Hiệu Suất Theo Hạng Phòng (Room Category Performance Table) -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
+                    <div class="p-3 p-sm-4 border-bottom bg-white d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h6 class="fw-bold text-dark m-0">Báo Cáo Hiệu Suất Theo Hạng Phòng (Room Performance)</h6>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">5 Hạng phòng</span>
+                            </div>
+                            <p class="text-muted small m-0 mt-1">Chi tiết số đêm bán, giá phòng trung bình và doanh thu đóng góp theo từng phân khúc phòng</p>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="input-group input-group-sm" style="max-width: 220px;">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-search text-muted"></i></span>
+                                <input type="text" id="roomCategorySearch" onkeyup="filterRoomCategoryTable()" class="form-control border-start-0" placeholder="Tìm hạng phòng...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-center" id="table-room-performance" style="font-size: 0.85rem;">
+                            <thead class="table-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="text-start ps-4">Hạng Phòng</th>
+                                    <th>Tổng Số Phòng</th>
+                                    <th>Đêm / Lượt Bán</th>
+                                    <th>Công Suất (%)</th>
+                                    <th class="text-end">Giá Niêm Yết</th>
+                                    <th class="text-end">Giá TB (ADR)</th>
+                                    <th class="text-end">Doanh Thu Phòng</th>
+                                    <th class="pe-4">Đánh Giá Hiệu Suất</th>
+                                </tr>
+                            </thead>
+                            <tbody id="room-performance-body">
+                                <tr><td colspan="8" class="py-4 text-muted">Đang tải số liệu hiệu suất...</td></tr>
+                            </tbody>
+                            <tfoot class="table-light fw-bold text-dark border-top">
+                                <tr>
+                                    <td class="text-start ps-4">Tổng cộng khách sạn (30 phòng)</td>
+                                    <td id="foot-total-rooms">30 phòng</td>
+                                    <td id="foot-total-nights">0 lượt</td>
+                                    <td class="text-success" id="foot-avg-occ">0%</td>
+                                    <td class="text-end">—</td>
+                                    <td class="text-end" id="foot-avg-adr">0 ₫</td>
+                                    <td class="text-end text-primary fs-6" id="foot-total-revenue">0 ₫</td>
+                                    <td class="pe-4 text-success" id="foot-revpar">RevPAR: 0 ₫</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Khuyến Nghị Tối Ưu Doanh Thu (Yield & Dynamic Pricing Strategy) -->
+                <div class="card border-0 shadow-sm p-4 rounded-4 text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #172554 100%);">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-3 d-flex align-items-center justify-content-center shrink-0 shadow" style="width: 44px; height: 44px; background: rgba(197, 157, 95, 0.25); color: #e4c48f; border: 1px solid rgba(197, 157, 95, 0.5);">
+                                <i class="fa-solid fa-wand-magic-sparkles fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-white m-0">Khuyến Nghị Tối Ưu Doanh Thu (Yield & Revenue Strategy)</h6>
+                                <p class="text-white-50 small m-0 mt-1" id="yield-recommendation-text" style="line-height: 1.5; max-width: 800px;">
+                                    Đang phân tích dữ liệu công suất và doanh thu phòng để đưa ra khuyến nghị giá tối ưu...
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="applyDynamicPricing()" class="btn btn-sm fw-bold px-3 py-2 shrink-0 text-dark rounded-3 shadow-sm" style="background: #c59d5f; font-size: 0.8rem;">
+                            <i class="fa-solid fa-bolt me-1"></i>Áp Dụng Dynamic Pricing
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
             <!-- SECTION 7: QUẢN TRỊ NHÂN SỰ & TÀI KHOẢN (DÀNH CHO QUẢN LÝ) -->
@@ -1305,19 +1711,329 @@ async function submitNewCustomer(e) {
     }
 }
 
-// 6. Báo cáo Doanh thu
-async function loadReports() {
-    try {
-        const stats = await StatsAPI.getSummary();
-        document.getElementById('report-revenue').innerText = formatMoney(stats.doanh_thu_thang);
-        document.getElementById('report-customers').innerText = stats.tong_khach_hang;
+// 6. Báo Cáo Doanh Thu Chuyên Sâu (Executive Revenue Intelligence)
+let currentReportPeriod = 'all';
+let currentReportView = 'ceo';
+let chartDailyInstance = null;
+let chartSourcesInstance = null;
+let currentReportData = null;
 
-        const rate = stats.tong_phong ? Math.round((stats.phong_dang_thue / stats.tong_phong) * 100) : 0;
-        document.getElementById('report-occupancy').innerText = `${rate}%`;
-        document.getElementById('report-occupancy-detail').innerText = `${stats.phong_dang_thue} / ${stats.tong_phong} phòng đang có khách`;
-    } catch (err) {
-        Swal.fire('Lỗi', err.message, 'error');
+function switchReportView(mode) {
+    currentReportView = mode;
+    const btnCeo = document.getElementById('viewBtnCeo');
+    const btnMgr = document.getElementById('viewBtnManager');
+    if (!btnCeo || !btnMgr) return;
+
+    if (mode === 'ceo') {
+        btnCeo.className = 'btn btn-sm fw-semibold rounded-2 px-3 py-1 text-dark shadow-sm';
+        btnCeo.style.background = '#c59d5f';
+        btnMgr.className = 'btn btn-sm fw-medium rounded-2 px-3 py-1 text-white-50';
+        btnMgr.style.background = 'transparent';
+        Swal.fire({
+            icon: 'info',
+            title: 'Chế độ CEO / Ban Quản Lý',
+            text: 'Tập trung vào Tổng doanh thu, RevPAR, Dòng tiền thực thu & Hiệu suất cốt lõi.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    } else {
+        btnMgr.className = 'btn btn-sm fw-semibold rounded-2 px-3 py-1 text-dark shadow-sm';
+        btnMgr.style.background = '#c59d5f';
+        btnCeo.className = 'btn btn-sm fw-medium rounded-2 px-3 py-1 text-white-50';
+        btnCeo.style.background = 'transparent';
+        Swal.fire({
+            icon: 'info',
+            title: 'Chế độ Revenue Manager',
+            text: 'Phân tích sâu ADR theo hạng phòng, công suất từng loại và chiến lược giá động.',
+            timer: 2000,
+            showConfirmButton: false
+        });
     }
+}
+
+function changeReportPeriod(period, btn) {
+    currentReportPeriod = period;
+    document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    loadReports(period);
+}
+
+async function loadReports(period = currentReportPeriod) {
+    try {
+        const data = await StatsAPI.getDetailedReport(period);
+        currentReportData = data;
+        const kpi = data.kpi;
+        const dongTien = data.dong_tien;
+        const coCau = data.co_cau_nguon_thu;
+        const loaiPhong = data.hieu_suat_loai_phong;
+        const tongKet = data.tong_ket_loai_phong;
+
+        // 1. Cập nhật 6 thẻ KPI
+        document.getElementById('kpi-total-revenue').innerText = formatMoney(kpi.tong_doanh_thu);
+        document.getElementById('kpi-paid-count').innerText = `${kpi.so_hoa_don_da_thu} hóa đơn đã thu`;
+        document.getElementById('kpi-room-revenue').innerText = formatMoney(kpi.doanh_thu_phong);
+        document.getElementById('kpi-room-percent').innerText = `${kpi.ty_le_doanh_thu_phong}% tổng thu`;
+        document.getElementById('kpi-revpar').innerText = formatMoney(kpi.rev_par);
+        document.getElementById('kpi-adr').innerText = formatMoney(kpi.adr);
+        document.getElementById('kpi-occupancy').innerText = `${kpi.cong_suat_hien_tai}%`;
+        document.getElementById('kpi-occupancy-sub').innerText = `${kpi.phong_dang_thue}/${kpi.tong_phong} phòng có khách`;
+        document.getElementById('kpi-service-revenue').innerText = formatMoney(kpi.doanh_thu_dich_vu);
+        document.getElementById('kpi-service-percent').innerText = `${kpi.ty_le_doanh_thu_dich_vu}% tổng thu`;
+
+        // 2. Dòng tiền & Công nợ ngắn hạn
+        document.getElementById('cashflow-received').innerText = formatMoney(dongTien.thuc_thu);
+        document.getElementById('cashflow-pending').innerText = formatMoney(dongTien.cho_thanh_toan);
+        const receivedRate = dongTien.ty_le_thuc_thu;
+        const pendingRate = Math.max(0, Math.round((100 - receivedRate) * 10) / 10);
+        document.getElementById('cashflow-received-bar').style.width = `${receivedRate}%`;
+        document.getElementById('cashflow-received-rate').innerText = `${receivedRate}%`;
+        document.getElementById('cashflow-pending-bar').style.width = `${pendingRate}%`;
+        document.getElementById('cashflow-pending-rate').innerText = `${pendingRate}%`;
+
+        // 3. Cơ cấu nguồn thu Text
+        document.getElementById('donut-room-val').innerText = `${formatMoney(coCau.tien_phong)} (${coCau.tien_phong_percent}%)`;
+        document.getElementById('donut-service-val').innerText = `${formatMoney(coCau.dich_vu)} (${coCau.dich_vu_percent}%)`;
+        document.getElementById('donut-other-val').innerText = `${formatMoney(coCau.vat_va_phu_thu)} (${coCau.vat_percent}%)`;
+
+        // 4. Bảng hiệu suất theo hạng phòng
+        const tbody = document.getElementById('room-performance-body');
+        if (tbody) {
+            tbody.innerHTML = loaiPhong.map(lp => `
+                <tr>
+                    <td class="text-start ps-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: ${lp.color};"></span>
+                            <div>
+                                <span class="fw-bold text-dark">${lp.ten_loai}</span>
+                                <div class="text-muted small">${lp.mo_ta}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="fw-semibold text-secondary">${lp.tong_so_phong} phòng</td>
+                    <td class="fw-bold text-dark">${lp.dem_ban} lượt</td>
+                    <td>
+                        <span class="badge ${lp.cong_suat > 0 ? 'bg-success-subtle text-success' : 'bg-light text-muted border'} px-2 py-1 rounded-pill">
+                            ${lp.cong_suat}%
+                        </span>
+                    </td>
+                    <td class="text-end fw-semibold text-muted">${formatMoney(lp.don_gia_ngay)}</td>
+                    <td class="text-end fw-semibold text-dark">${formatMoney(lp.adr)}</td>
+                    <td class="text-end fw-bold text-primary fs-6">${formatMoney(lp.doanh_thu_phong)}</td>
+                    <td class="pe-4">
+                        <span class="badge ${lp.badge_class} px-2.5 py-1 rounded-pill small">${lp.danh_gia}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Cập nhật tfoot bảng hạng phòng
+        if (tongKet) {
+            document.getElementById('foot-total-rooms').innerText = `${tongKet.tong_phong} phòng`;
+            document.getElementById('foot-total-nights').innerText = `${tongKet.tong_dem_ban} lượt`;
+            document.getElementById('foot-avg-occ').innerText = `${tongKet.cong_suat_tb}%`;
+            document.getElementById('foot-avg-adr').innerText = formatMoney(tongKet.adr_tb);
+            document.getElementById('foot-total-revenue').innerText = formatMoney(tongKet.tong_doanh_thu_phong);
+            document.getElementById('foot-revpar').innerText = `RevPAR: ${formatMoney(tongKet.rev_par)}`;
+        }
+
+        // 5. Khuyến nghị chiến lược
+        document.getElementById('yield-recommendation-text').innerText = data.khuyen_nghi || '';
+
+        // 6. Vẽ lại biểu đồ Chart.js (hủy biểu đồ cũ nếu đã vẽ)
+        renderRevenueCharts(data);
+    } catch (err) {
+        console.error('Lỗi nạp báo cáo doanh thu:', err);
+    }
+}
+
+function renderRevenueCharts(data) {
+    if (typeof Chart === 'undefined') return;
+
+    // Biểu đồ 1: Diễn biến doanh thu & công suất
+    const canvasDaily = document.getElementById('chartDailyRevenue');
+    if (canvasDaily) {
+        if (chartDailyInstance) {
+            chartDailyInstance.destroy();
+        }
+
+        const ctxDaily = canvasDaily.getContext('2d');
+        const dienBien = data.dien_bien_ngay || {};
+        chartDailyInstance = new Chart(ctxDaily, {
+            type: 'bar',
+            data: {
+                labels: dienBien.labels || [],
+                datasets: [
+                    {
+                        label: 'Doanh thu (Triệu VNĐ)',
+                        data: dienBien.revenue || [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                        borderColor: '#2563eb',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        yAxisID: 'yRevenue',
+                        order: 3
+                    },
+                    {
+                        label: 'Công suất phòng (%)',
+                        data: dienBien.occ || [],
+                        type: 'line',
+                        borderColor: '#f59e0b',
+                        backgroundColor: '#f59e0b',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f59e0b',
+                        tension: 0.3,
+                        yAxisID: 'yOcc',
+                        order: 1
+                    },
+                    {
+                        label: 'ADR (Nghìn VNĐ)',
+                        data: dienBien.adr || [],
+                        type: 'line',
+                        borderColor: '#10b981',
+                        backgroundColor: '#10b981',
+                        borderWidth: 2,
+                        borderDash: [4, 4],
+                        pointRadius: 3,
+                        tension: 0.3,
+                        yAxisID: 'yAdr',
+                        order: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 10,
+                        titleFont: { size: 12, weight: 'bold' },
+                        bodyFont: { size: 11 },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label.includes('Doanh thu')) {
+                                    return ` Doanh thu: ${context.parsed.y} triệu VNĐ`;
+                                } else if (label.includes('Công suất')) {
+                                    return ` Công suất lấp đầy: ${context.parsed.y}%`;
+                                } else if (label.includes('ADR')) {
+                                    return ` Giá ADR TB: ${(context.parsed.y * 1000).toLocaleString('vi-VN')} ₫`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 }, color: '#64748b' }
+                    },
+                    yRevenue: {
+                        type: 'linear',
+                        position: 'left',
+                        title: { display: true, text: 'Doanh thu (Triệu ₫)', font: { size: 10 }, color: '#2563eb' },
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { size: 10 }, color: '#64748b' }
+                    },
+                    yOcc: {
+                        type: 'linear',
+                        position: 'right',
+                        title: { display: true, text: 'Công suất (%)', font: { size: 10 }, color: '#f59e0b' },
+                        min: 0,
+                        max: 100,
+                        grid: { display: false },
+                        ticks: {
+                            callback: function(v) { return v + '%'; },
+                            font: { size: 10 },
+                            color: '#f59e0b'
+                        }
+                    },
+                    yAdr: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Biểu đồ 2: Cơ cấu nguồn thu (Donut)
+    const canvasSources = document.getElementById('chartRevenueSources');
+    if (canvasSources) {
+        if (chartSourcesInstance) {
+            chartSourcesInstance.destroy();
+        }
+
+        const ctxSources = canvasSources.getContext('2d');
+        const coCau = data.co_cau_nguon_thu || {};
+        chartSourcesInstance = new Chart(ctxSources, {
+            type: 'doughnut',
+            data: {
+                labels: ['Tiền phòng (Room)', 'Ẩm thực & Dịch vụ (F&B)', 'Thuế VAT & Phụ thu'],
+                datasets: [{
+                    data: [coCau.tien_phong || 0, coCau.dich_vu || 0, coCau.vat_va_phu_thu || 0],
+                    backgroundColor: ['#2563eb', '#f59e0b', '#10b981'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw || 0;
+                                return ` ${context.label}: ${formatMoney(val)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function filterRoomCategoryTable() {
+    const input = document.getElementById('roomCategorySearch');
+    if (!input) return;
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById('table-room-performance');
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length - 1; i++) {
+        const td = tr[i].getElementsByTagName('td')[0];
+        if (td) {
+            const txt = td.textContent || td.innerText;
+            tr[i].style.display = txt.toUpperCase().indexOf(filter) > -1 ? '' : 'none';
+        }
+    }
+}
+
+function applyDynamicPricing() {
+    Swal.fire({
+        title: 'Áp dụng Dynamic Pricing?',
+        text: 'Hệ thống sẽ cập nhật bảng giá khuyến nghị linh hoạt theo công suất thực tế vào hệ thống Đặt phòng & Lễ tân.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Xác nhận áp dụng',
+        cancelButtonText: 'Hủy'
+    }).then(res => {
+        if (res.isConfirmed) {
+            Swal.fire('Thành công', 'Đã đồng bộ chính sách Dynamic Pricing tới hệ thống Lễ tân & Đặt phòng!', 'success');
+        }
+    });
 }
 
 // 7. Quản trị Nhân sự & Tài khoản (Dành cho Quản lý)

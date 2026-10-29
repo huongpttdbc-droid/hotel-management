@@ -143,7 +143,8 @@ const InvoiceAPI = {
 
 // 6. Thống kê
 const StatsAPI = {
-    getSummary: () => apiRequest('/thong-ke/tong-quan')
+    getSummary: () => apiRequest('/thong-ke/tong-quan'),
+    getDetailedReport: (period = 'all') => apiRequest(`/thong-ke/doanh-thu-chi-tiet?period=${encodeURIComponent(period)}`)
 };
 
 // Gắn trực tiếp lên window để đảm bảo tương thích mọi môi trường và tránh lỗi undefined
