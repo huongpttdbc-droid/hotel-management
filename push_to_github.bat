@@ -16,8 +16,16 @@ echo 2. Nhanh hien tai:
 git branch -M main
 
 echo.
-echo 3. Dang dong bo va Push ma nguon len GitHub...
+echo 3. Tu dong them file va commit thay doi...
+git add .
+git commit -m "chore: Dong bo ma nguon moi nhat" > nul 2>&1
+
+echo.
+echo 4. Dang dong bo voi GitHub (Pull Rebase)...
 git pull --rebase origin main
+
+echo.
+echo 5. Dang Push ma nguon len GitHub...
 git push origin main
 
 echo.

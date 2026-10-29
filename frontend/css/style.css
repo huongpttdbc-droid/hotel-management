@@ -322,7 +322,7 @@ body {
 }
 
 /* ==========================================================================
-   5. TABLES (Clean Soft Modern Table)
+   5. TABLES (Clean Soft Modern Table & Prominent Headers)
    ========================================================================== */
 .table-custom {
     background: #FFFFFF;
@@ -337,25 +337,39 @@ body {
     color: var(--text-body);
     border-collapse: separate;
     border-spacing: 0;
+    width: 100%;
 }
 
-.table th {
-    background: #FAFBFC !important;
-    color: #425166 !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    border-bottom: 1px solid var(--border-soft) !important;
-    padding: 16px 18px !important;
-    white-space: nowrap;
-    text-transform: none;
+/* Tiêu đề cột (Table Headers) Nổi bật, Rõ ràng, Tương phản cao chuẩn Dabang Dashboard */
+.table thead th,
+.table th,
+.table-light th,
+thead.table-light th,
+.table thead.table-light th {
+    background-color: #EEF2F6 !important;
+    color: #151D48 !important;
+    font-weight: 700 !important;
+    font-size: 0.8125rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-top: none !important;
+    border-bottom: 2px solid #CBD5E1 !important;
+    padding: 13px 16px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+}
+
+thead.text-muted th,
+.table thead.text-muted th {
+    color: #151D48 !important;
 }
 
 .table td {
-    padding: 16px 18px !important;
+    padding: 13px 16px !important;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-soft) !important;
-    color: #737791 !important;
-    font-size: 0.9rem;
+    color: #425166 !important;
+    font-size: 0.875rem;
 }
 
 .table tbody tr:hover td {
@@ -429,13 +443,13 @@ body {
     border-color: #00B67A !important;
 }
 
-/* Nút Cố Định & Cân Đối trong Bảng Hóa Đơn (Xem HĐ / Thu tiền / Đã xong) */
+/* Nút Cố Định & Cân Đối trong Bảng Hóa Đơn & Bảng Thuê Phòng */
 .action-btn-fixed {
-    width: 94px !important;
-    min-width: 94px !important;
-    height: 32px !important;
-    font-size: 0.8125rem !important;
-    padding: 0 8px !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    height: 30px !important;
+    font-size: 0.78rem !important;
+    padding: 0 4px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -444,6 +458,25 @@ body {
     box-sizing: border-box !important;
     white-space: nowrap !important;
     text-decoration: none !important;
+    gap: 4px !important;
+}
+
+/* Nút Dọn Xong Soft Amber Pastel */
+.btn-clean-done {
+    background-color: #FFF4DE !important;
+    color: #D97706 !important;
+    border: 1px solid #FDE68A !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-clean-done:hover {
+    background-color: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #FCD34D !important;
+    box-shadow: 0px 4px 12px rgba(253, 230, 138, 0.4) !important;
 }
 
 /* Nút Outline Primary */
@@ -501,10 +534,10 @@ body {
     border: 1px solid rgba(250, 90, 125, 0.2) !important;
 }
 
-.badge.bg-warning, .badge.bg-warning-subtle {
+.badge.bg-warning, .badge.bg-warning-subtle, .badge.badge-don, .badge-don {
     background-color: #FFF4DE !important;
-    color: #FF8F0D !important;
-    border: 1px solid rgba(255, 143, 13, 0.2) !important;
+    color: #D97706 !important;
+    border: 1px solid #FDE68A !important;
 }
 
 .badge.bg-info, .badge.bg-info-subtle {
@@ -520,7 +553,7 @@ body {
 }
 
 /* ==========================================================================
-   8. ROOM CARDS (Sơ Đồ Phòng Soft Clean)
+   8. ROOM CARDS (Sơ Đồ Phòng Soft Clean & Cân Đối Chiều Cao)
    ========================================================================== */
 .room-card {
     border-radius: 18px !important;
@@ -529,6 +562,17 @@ body {
     background: #FFFFFF !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 215px !important;
+}
+
+.room-card .card-body {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
 }
 
 .room-card:hover {
@@ -547,7 +591,7 @@ body {
 }
 
 .status-don {
-    background: linear-gradient(180deg, #FFFFFF 65%, #FFFBEB 100%) !important;
+    background: linear-gradient(180deg, #FFFFFF 65%, #FFFDF5 100%) !important;
     border-top: 4px solid #FF947A !important;
 }
 
