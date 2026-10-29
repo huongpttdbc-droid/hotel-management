@@ -7,29 +7,29 @@ echo ========================================================
 echo.
 set "PATH=C:\Users\PHAM HUONG\AppData\Local\Programs\Git\cmd;%PATH%"
 
-echo 1. Kiểm tra cấu hình Remote...
+echo 1. Kiem tra Remote origin...
 git remote set-url origin https://huongpttdbc-droid@github.com/huongpttdbc-droid/hotel-management.git
 git remote -v
 
 echo.
-echo 2. Chuyển nhánh main...
+echo 2. Nhanh hien tai:
 git branch -M main
 
 echo.
-echo 3. Đang thực hiện Push mã nguồn lên GitHub...
-echo [LƯU Ý] Trình duyệt hoặc cửa sổ GitHub sẽ tự động mở lên để bạn xác thực tài khoản huongpttdbc-droid.
+echo 3. Dang thuc hien Push ma nguon da sua len GitHub...
+echo [CHU Y] Neu trinh duyet mo tab GitHub, ban chi can bam 'Authorize' de hoan tat!
 echo.
-git push -u origin main
+git push origin main
 
 echo.
 if %ERRORLEVEL% EQU 0 (
     echo ========================================================
-    echo   THÀNH CÔNG! MÃ NGUỒN ĐÃ ĐƯỢC ĐẨY LÊN GITHUB HOÀN TẤT!
+    echo   [THANH CONG] MA NGUON MOI DA LEN GITHUB!
+    echo   Render se tu dong cap nhat va het sach loi trong 1-2 phut!
     echo ========================================================
 ) else (
     echo ========================================================
-    echo   CÓ LỖI XẢY RA HOẶC BẠN ĐÃ HỦY XÁC THỰC.
+    echo   [THONG BAO] Chua hoan tat push. Vui long kiem tra xac thuc.
     echo ========================================================
 )
 pause
-

@@ -68,8 +68,21 @@ def create_rental(req: PhieuThueCreate, db: Session = Depends(get_db)):
     if phong.TinhTrang != "Trống":
         raise HTTPException(status_code=400, detail=f"Phòng {phong.SoPhong} hiện tại không trống (Tình trạng: {phong.TinhTrang})")
 
-    # 3. Lấy đơn giá áp dụng từ loại phòng
+    # 3. Lấy đơn giá áp dụng từ loại phòng & kiểm tra sức chứa
     lp = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == phong.MaLoaiPhong).first()
+    suc_chua = 99
+    if lp and lp.SucChua is not None:
+        try:
+            suc_chua = int(lp.SucChua)
+        except (ValueError, TypeError):
+            suc_chua = 99
+
+    if req.SoNguoiDuKien > suc_chua:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Số người dự kiến ({req.SoNguoiDuKien}) vượt quá sức chứa tối đa ({suc_chua} người) của loại phòng {lp.TenLoai if lp else ''}."
+        )
+
     don_gia = 0
     if req.HinhThucThue == "Theo giờ":
         don_gia = float(lp.DonGiaTheoGio or 0)
@@ -116,8 +129,12 @@ def create_rental(req: PhieuThueCreate, db: Session = Depends(get_db)):
     # Cập nhật trạng thái phòng sang 'Đang thuê'
     phong.TinhTrang = "Đang thuê"
 
-    db.commit()
-    db.refresh(new_pt)
+    try:
+        db.commit()
+        db.refresh(new_pt)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Không thể lập phiếu thuê: {e.orig if hasattr(e, 'orig') else e}")
 
     return PhieuThueOut(
         MaPhieuThue=new_pt.MaPhieuThue,

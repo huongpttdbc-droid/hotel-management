@@ -232,6 +232,21 @@ def generate_invoice(ma_pt: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_hd)
 
+    # Cập nhật thêm TongTien trong SQLite fallback nếu cần
+    if db.bind and db.bind.dialect.name == "sqlite":
+        try:
+            subtotal = max(0.0, tien_phong + tien_dich_vu - uu_dai)
+            vat_val = round(subtotal * 0.1)
+            tong_val = round(subtotal + vat_val)
+            db.execute(text("UPDATE HoaDon SET TongTien = :tong, TienVAT = :vat WHERE MaHD = :ma"), {
+                'tong': tong_val,
+                'vat': vat_val,
+                'ma': ma_hd
+            })
+            db.commit()
+        except Exception:
+            pass
+
     return build_rich_invoice_response(new_hd, pt, db)
 
 @router.post("/{ma_hd}/thanh-toan")
@@ -243,18 +258,50 @@ def pay_invoice(ma_hd: str, db: Session = Depends(get_db)):
     if hd.TrangThai == "Đã thanh toán":
         return {"message": f"Hóa đơn {ma_hd} đã được thanh toán trước đó."}
 
-    # 1. Tính tổng tiền thực tế của hóa đơn
-    tien_goc = (hd.TienPhong or 0) + (hd.TienDichVu or 0) + (hd.TienPhuThu or 0) - (hd.UuDai or 0)
-    vat = round(tien_goc * float(hd.TyLeVAT or 10) / 100.0)
-    tong_tien = tien_goc + vat
+    # Chuyển đổi an toàn các trường tiền sang float (tránh lỗi cộng chuỗi trên SQLite fallback)
+    try:
+        tp = float(hd.TienPhong or 0)
+    except (ValueError, TypeError):
+        tp = 0.0
+    try:
+        tdv = float(hd.TienDichVu or 0)
+    except (ValueError, TypeError):
+        tdv = 0.0
+    try:
+        tpt = float(hd.TienPhuThu or 0)
+    except (ValueError, TypeError):
+        tpt = 0.0
+    try:
+        ud = float(hd.UuDai or 0)
+    except (ValueError, TypeError):
+        ud = 0.0
+    try:
+        vat_rate = float(hd.TyLeVAT or 10)
+    except (ValueError, TypeError):
+        vat_rate = 10.0
 
-    # 2. Kiểm tra số tiền đã thu trong bảng ThanhToan
+    # 1. Lấy đúng tổng tiền thực tế từ cột TongTien nếu có sẵn
+    res_tong = db.execute(text("SELECT TongTien FROM HoaDon WHERE MaHD = :ma"), {'ma': ma_hd}).scalar()
+    if res_tong is not None:
+        try:
+            tong_tien = round(float(res_tong))
+        except (ValueError, TypeError):
+            tien_goc = tp + tdv + tpt - ud
+            vat = round(tien_goc * vat_rate / 100.0)
+            tong_tien = round(tien_goc + vat)
+    else:
+        tien_goc = tp + tdv + tpt - ud
+        vat = round(tien_goc * vat_rate / 100.0)
+        tong_tien = round(tien_goc + vat)
+
+    # 2. Kiểm tra số tiền đã thu trong bảng ThanhToan (truyền tham số Unicode chuẩn cho SQL Server & SQLite)
     res_da_thu = db.execute(text("""
-        SELECT COALESCE(SUM(CASE LoaiKhoan WHEN 'Hoàn tiền' THEN -SoTien ELSE SoTien END), 0)
+        SELECT COALESCE(SUM(CASE LoaiKhoan WHEN :hoan_tien THEN -SoTien ELSE SoTien END), 0)
         FROM ThanhToan WHERE MaPhieuThue = :pt
-    """), {'pt': hd.MaPhieuThue}).scalar()
+    """), {'hoan_tien': 'Hoàn tiền', 'pt': hd.MaPhieuThue}).scalar()
     da_thu = float(res_da_thu or 0)
-    can_thu = round(tong_tien - da_thu)
+
+    can_thu = max(0, round(tong_tien - da_thu))
 
     # 3. Nếu chưa đủ tiền, tạo bản ghi ThanhToan mới (loại Thanh toán)
     # để thỏa mãn trigger TR_HoaDon_KiemTra và TR_ThanhToan_KiemTra
@@ -285,10 +332,27 @@ def pay_invoice(ma_hd: str, db: Session = Depends(get_db)):
     # 4. Cập nhật trạng thái hóa đơn sang Đã thanh toán
     hd.TrangThai = "Đã thanh toán"
 
-    # 5. Cập nhật phiếu thuê sang Hoàn tất nếu tất cả phòng trong phiếu đã trả
+    # Nếu đang dùng SQLite fallback, cập nhật trực tiếp cột TongTien và TienVAT
+    if db.bind and db.bind.dialect.name == "sqlite":
+        try:
+            vat_val = round(((hd.TienPhong or 0) + (hd.TienDichVu or 0) + (hd.TienPhuThu or 0) - (hd.UuDai or 0)) * float(hd.TyLeVAT or 10) / 100.0)
+            db.execute(text("UPDATE HoaDon SET TongTien = :tong, TienVAT = :vat WHERE MaHD = :ma"), {
+                'tong': tong_tien,
+                'vat': vat_val,
+                'ma': ma_hd
+            })
+        except Exception:
+            pass
+
+    # 5. Cập nhật phiếu thuê sang Hoàn tất nếu phiếu không bị hủy và tất cả phòng trong phiếu đã trả
     pt = db.query(PhieuThue).filter(PhieuThue.MaPhieuThue == hd.MaPhieuThue).first()
-    if pt and all(ct.GioTra is not None for ct in pt.chi_tiet):
+    if pt and pt.TrangThai != "Đã hủy" and all(ct.GioTra is not None for ct in pt.chi_tiet):
         pt.TrangThai = "Hoàn tất"
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Không thể thu tiền: {e.orig if hasattr(e, 'orig') else e}")
+
     return {"message": f"Hóa đơn {ma_hd} đã được thu tiền và thanh toán thành công!"}

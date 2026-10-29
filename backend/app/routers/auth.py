@@ -44,8 +44,9 @@ def verify_password(plain_password: str, db_hash: str, salt: str = None) -> bool
         ]
         target = (db_hash or "").upper()
         for v in variants:
-            h = hashlib.sha256((salt + v).encode("utf-8")).hexdigest().upper()
-            if h == target:
+            h1 = hashlib.sha256((salt + v).encode("utf-8")).hexdigest().upper()
+            h2 = hashlib.sha256((v + salt).encode("utf-8")).hexdigest().upper()
+            if h1 == target or h2 == target:
                 return True
     hashed_direct = hashlib.sha256(p.encode("utf-8")).hexdigest().upper()
     return hashed_direct == (db_hash or "").upper()
@@ -86,10 +87,21 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
             )
         )
 
-    # 2. Kiểm tra bảng TaiKhoan trong Database (hỗ trợ hoa/thường)
+    # 2. Kiểm tra bảng TaiKhoan trong Database (hỗ trợ hoa/thường, tiền tố tên hoa/nam/tuan, và mã NV)
     from sqlalchemy import func
-    tk = db.query(TaiKhoan).filter(func.lower(TaiKhoan.TenDangNhap) == username_lower).first()
+    tk = db.query(TaiKhoan).filter(
+        (func.lower(TaiKhoan.TenDangNhap) == username_lower) |
+        (func.lower(TaiKhoan.TenDangNhap).like(f"{username_lower}.%")) |
+        (func.lower(TaiKhoan.MaNV) == username_lower)
+    ).first()
+
     if tk:
+        if tk.TrangThai == "Khóa":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Tài khoản '{tk.TenDangNhap}' hiện đang bị khóa."
+            )
+
         if verify_password(password, tk.MatKhau, tk.Salt):
             nv = db.query(NhanVien).filter(NhanVien.MaNV == tk.MaNV).first()
             name = nv.HoTen if nv else tk.TenDangNhap
