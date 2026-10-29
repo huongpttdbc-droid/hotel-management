@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 > nul
 echo ========================================================
-echo   ĐẨY DỰ ÁN KHÁCH SẠN LÊN GITHUB
+echo   DAY DU AN KHACH SAN LEN GITHUB
 echo   Repository: https://github.com/huongpttdbc-droid/hotel-management.git
 echo ========================================================
 echo.
@@ -16,20 +16,19 @@ echo 2. Nhanh hien tai:
 git branch -M main
 
 echo.
-echo 3. Dang thuc hien Push ma nguon da sua len GitHub...
-echo [CHU Y] Neu trinh duyet mo tab GitHub, ban chi can bam 'Authorize' de hoan tat!
-echo.
+echo 3. Dang dong bo va Push ma nguon len GitHub...
+git pull --rebase origin main
 git push origin main
 
 echo.
 if %ERRORLEVEL% EQU 0 (
     echo ========================================================
-    echo   [THANH CONG] MA NGUON MOI DA LEN GITHUB!
-    echo   Render se tu dong cap nhat va het sach loi trong 1-2 phut!
+    echo   [THANH CONG] MA NGUON DA DUOC DONG BO LEN GITHUB!
+    echo   Render se tu dong cap nhat trong 1-2 phut.
     echo ========================================================
 ) else (
     echo ========================================================
-    echo   [THONG BAO] Chua hoan tat push. Vui long kiem tra xac thuc.
+    echo   [THONG BAO] Co loi xay ra khi push. Vui long kiem tra.
     echo ========================================================
 )
 pause
