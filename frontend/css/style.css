@@ -772,58 +772,250 @@ thead.text-muted th,
 }
 
 /* ==========================================================================
-   10. PRINT MEDIA STYLING (Xuất & In Báo Cáo Doanh Thu Chuyên Nghiệp)
+   10. PRINT MEDIA STYLING (Xuất & In Báo Cáo Doanh Thu & Hóa Đơn Chuyên Nghiệp)
    ========================================================================== */
 @media print {
-    /* Ẩn các thành phần điều hướng và nút thao tác khi in */
-    .sidebar,
-    .top-bar,
-    .content-section:not(#section-reports),
-    .time-filter-btn,
-    .btn,
-    button,
-    #roomCategorySearch,
-    .input-group,
-    #viewBtnCeo,
-    #viewBtnManager,
-    .modal,
-    .swal2-container {
-        display: none !important;
+    @page {
+        size: A4 portrait;
+        margin: 10mm 12mm 15mm 12mm;
     }
 
-    /* Đảm bảo nền trắng và bảo toàn màu sắc biểu đồ, thẻ KPI */
-    body, html {
+    /* 1. RESET TOÀN BỘ LAYOUT CHO CHẾ ĐỘ IN (Khắc phục triệt để trang in trắng tinh) */
+    html, body, #root, .main-layout, .content-container, .container-fluid, .row, .main-content {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         background: #FFFFFF !important;
         color: #0F172A !important;
         font-size: 11pt !important;
-        margin: 0 !important;
-        padding: 0 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    .main-content {
-        padding: 0 !important;
-        margin: 0 !important;
+    /* ==========================================================================
+       TRƯỜNG HỢP 1: IN BÁO CÁO DOANH THU (LUXURY REVENUE REPORT PRINT)
+       ========================================================================== */
+    body:not(.print-invoice-mode) .sidebar,
+    body:not(.print-invoice-mode) .top-bar,
+    body:not(.print-invoice-mode) .content-section:not(#section-reports),
+    body:not(.print-invoice-mode) .time-filter-btn,
+    body:not(.print-invoice-mode) .btn,
+    body:not(.print-invoice-mode) button,
+    body:not(.print-invoice-mode) #roomCategorySearch,
+    body:not(.print-invoice-mode) .input-group,
+    body:not(.print-invoice-mode) #viewBtnCeo,
+    body:not(.print-invoice-mode) #viewBtnManager,
+    body:not(.print-invoice-mode) .filter-btn,
+    body:not(.print-invoice-mode) .modal,
+    body:not(.print-invoice-mode) .swal2-container,
+    body:not(.print-invoice-mode) .tooltip-box,
+    body:not(.print-invoice-mode) .border-start {
+        display: none !important;
+    }
+
+    /* Vùng Báo Cáo Doanh Thu hiển thị trọn vẹn 100% */
+    body:not(.print-invoice-mode) #section-reports {
+        display: block !important;
+        visibility: visible !important;
         width: 100% !important;
         max-width: 100% !important;
-    }
-
-    #section-reports {
-        display: block !important;
-        width: 100% !important;
         margin: 0 !important;
-        padding: 10mm !important;
+        padding: 0 !important;
+        position: static !important;
+        background: #FFFFFF !important;
     }
 
-    .card, .report-card, .table-custom {
+    body:not(.print-invoice-mode) #section-reports * {
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Định dạng Header khách sạn & các Card thống kê */
+    #section-reports .card {
         box-shadow: none !important;
         border: 1px solid #CBD5E1 !important;
-        break-inside: avoid;
+        background: #FFFFFF !important;
+        border-radius: 12px !important;
+        margin-bottom: 16px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
     }
 
-    .table th {
+    /* 6 thẻ KPI Metrics: Phân bổ 3 thẻ / hàng trên trang in A4 */
+    #section-reports .row.g-3.mb-4 {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        margin-left: -6px !important;
+        margin-right: -6px !important;
+    }
+
+    #section-reports .row.g-3.mb-4 > [class*="col-"] {
+        flex: 0 0 33.333333% !important;
+        max-width: 33.333333% !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        margin-bottom: 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    .report-card {
+        box-shadow: none !important;
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 10px !important;
+        background: #FFFFFF !important;
+        height: 100% !important;
+    }
+
+    /* Khu vực 2 Biểu Đồ Chart.js: Hiển thị dạng Flexbox nằm ngang */
+    #section-reports .row.g-4.mb-4 {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 14px !important;
+        margin-bottom: 16px !important;
+    }
+
+    #section-reports .row.g-4.mb-4 > .col-lg-8 {
+        flex: 0 0 64% !important;
+        max-width: 64% !important;
+        box-sizing: border-box !important;
+    }
+
+    #section-reports .row.g-4.mb-4 > .col-lg-4 {
+        flex: 0 0 36% !important;
+        max-width: 36% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Canvas Chart.js */
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Khu vực Dòng tiền & Công nợ: 2 cột 50% */
+    #section-reports .row.g-3:not(.mb-4) {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 12px !important;
+    }
+
+    #section-reports .row.g-3:not(.mb-4) > .col-md-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Bảng hiệu suất theo hạng phòng */
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    #table-room-performance {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 8px !important;
+    }
+
+    #table-room-performance th {
         background-color: #F1F5F9 !important;
         color: #0F172A !important;
+        font-weight: 700 !important;
+        border-bottom: 2px solid #94A3B8 !important;
+        border-top: 1px solid #CBD5E1 !important;
+        padding: 8px 6px !important;
+        font-size: 11px !important;
+    }
+
+    #table-room-performance td {
+        border-bottom: 1px solid #E2E8F0 !important;
+        padding: 8px 6px !important;
+        font-size: 11.5px !important;
+        color: #1E293B !important;
+    }
+
+    #table-room-performance tfoot td {
+        background-color: #F8FAFC !important;
+        font-weight: 700 !important;
+        border-top: 2px solid #CBD5E1 !important;
+    }
+
+    /* Thanh tiến trình Progress Bar */
+    .progress {
+        background-color: #E2E8F0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .progress-bar.bg-success {
+        background-color: #10B981 !important;
+    }
+
+    .progress-bar.bg-warning {
+        background-color: #F59E0B !important;
+    }
+
+    /* ==========================================================================
+       TRƯỜNG HỢP 2: IN HÓA ĐƠN KHÁCH SẠN TỪ MODAL (print-invoice-mode)
+       ========================================================================== */
+    body.print-invoice-mode .container-fluid,
+    body.print-invoice-mode .sidebar,
+    body.print-invoice-mode .top-bar,
+    body.print-invoice-mode .main-content,
+    body.print-invoice-mode .content-section {
+        display: none !important;
+    }
+
+    body.print-invoice-mode #invoiceModal {
+        display: block !important;
+        position: static !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        background: #FFFFFF !important;
+    }
+
+    body.print-invoice-mode #invoiceModal .modal-dialog {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body.print-invoice-mode #invoiceModal .modal-content {
+        border: none !important;
+        box-shadow: none !important;
+        background: #FFFFFF !important;
+    }
+
+    body.print-invoice-mode #invoiceModal .modal-header,
+    body.print-invoice-mode #invoiceModal .modal-footer {
+        display: none !important;
+    }
+
+    body.print-invoice-mode #printable-invoice {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #FFFFFF !important;
+    }
+
+    body.print-invoice-mode #printable-invoice * {
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 }
