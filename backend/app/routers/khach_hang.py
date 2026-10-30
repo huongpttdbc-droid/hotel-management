@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.app.database import get_db
 from backend.app.models import KhachHang, KhachHangSDT, LoaiKhachHang
 from backend.app.schemas import KhachHangOut, KhachHangCreate
@@ -14,7 +14,14 @@ def list_customers(
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db)
 ):
-    query = db.query(KhachHang).join(LoaiKhachHang, KhachHang.MaLoaiKH == LoaiKhachHang.MaLoaiKH)
+    # Eager load loai_khach_hang và so_dien_thoai bằng joinedload trong 1 query duy nhất
+    query = (
+        db.query(KhachHang)
+        .options(
+            joinedload(KhachHang.loai_khach_hang),
+            joinedload(KhachHang.so_dien_thoai)
+        )
+    )
 
     if keyword:
         k = f"%{keyword.strip()}%"
@@ -26,9 +33,8 @@ def list_customers(
     results = []
 
     for c in customers:
-        # Lấy số điện thoại đầu tiên
-        sdt_record = db.query(KhachHangSDT.SDT).filter(KhachHangSDT.MaKH == c.MaKH).first()
-        sdt = sdt_record[0] if sdt_record else None
+        # Lấy số điện thoại từ relationship đã eager-load, không query DB lặp
+        sdt = c.so_dien_thoai[0].SDT if (c.so_dien_thoai and len(c.so_dien_thoai) > 0) else None
 
         results.append(
             KhachHangOut(

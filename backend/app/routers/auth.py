@@ -1,7 +1,7 @@
 import hashlib
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.app.database import get_db
 from backend.app.schemas import LoginRequest, TokenResponse, UserOut
 from backend.app.models import TaiKhoan, NhanVien, KhachHang
@@ -72,15 +72,12 @@ def list_staff_accounts(
     - Cùng chức vụ sắp xếp tiếp theo Mã nhân viên (MaNV)
     - Hỗ trợ tìm kiếm theo tên / mã NV và lọc theo chức vụ thực tế
     """
-    # 1. Truy vấn toàn bộ nhân viên thực tế từ bảng NhanVien
-    nvs = db.query(NhanVien).all()
-
-    # 2. Truy vấn tài khoản hệ thống tương ứng
-    tks = {tk.MaNV: tk for tk in db.query(TaiKhoan).all()}
+    # 1. Truy vấn toàn bộ nhân viên và tài khoản tương ứng bằng joinedload trong 1 query duy nhất
+    nvs = db.query(NhanVien).options(joinedload(NhanVien.tai_khoan)).all()
 
     results = []
     for nv in nvs:
-        tk = tks.get(nv.MaNV)
+        tk = nv.tai_khoan
         role_name = (nv.ChucVu or "Nhân viên").strip()
         role_order = ROLE_HIERARCHY.get(role_name, 99)
 
@@ -146,13 +143,18 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
             )
         )
 
-    # 2. Kiểm tra bảng TaiKhoan trong Database (hỗ trợ hoa/thường, tiền tố tên hoa/nam/tuan, và mã NV)
+    # 2. Kiểm tra bảng TaiKhoan trong Database (kèm joinedload NhanVien để tránh N+1 query)
     from sqlalchemy import func
-    tk = db.query(TaiKhoan).filter(
-        (func.lower(TaiKhoan.TenDangNhap) == username_lower) |
-        (func.lower(TaiKhoan.TenDangNhap).like(f"{username_lower}.%")) |
-        (func.lower(TaiKhoan.MaNV) == username_lower)
-    ).first()
+    tk = (
+        db.query(TaiKhoan)
+        .options(joinedload(TaiKhoan.nhan_vien))
+        .filter(
+            (func.lower(TaiKhoan.TenDangNhap) == username_lower) |
+            (func.lower(TaiKhoan.TenDangNhap).like(f"{username_lower}.%")) |
+            (func.lower(TaiKhoan.MaNV) == username_lower)
+        )
+        .first()
+    )
 
     if tk:
         if tk.TrangThai == "Khóa":
@@ -162,7 +164,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
             )
 
         if verify_password(password, tk.MatKhau, tk.Salt):
-            nv = db.query(NhanVien).filter(NhanVien.MaNV == tk.MaNV).first()
+            nv = tk.nhan_vien
             name = nv.HoTen if nv else tk.TenDangNhap
             chuc_vu = nv.ChucVu if nv else "Lễ tân"
             role = "admin" if ("Quản lý" in chuc_vu or "Admin" in chuc_vu) else "staff"

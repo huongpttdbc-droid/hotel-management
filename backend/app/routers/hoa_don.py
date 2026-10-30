@@ -1,8 +1,9 @@
 import math
+import collections
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import text
 from backend.app.database import get_db
 from backend.app.models import (
@@ -48,7 +49,13 @@ def calculate_room_charge(ct: ChiTietPhieuThue, pt_status: str):
         so_ngay = max(1, math.ceil(hours / 24.0))
         return don_gia * so_ngay, f"{so_ngay} ngày", gio_tra
 
-def build_rich_invoice_response(hd: HoaDon, pt: PhieuThue, db: Session) -> HoaDonOut:
+def build_rich_invoice_response(
+    hd: HoaDon,
+    pt: Optional[PhieuThue],
+    db: Session,
+    staff_map: Optional[Dict[str, str]] = None,
+    services_map: Optional[Dict[str, List[DungDichVu]]] = None
+) -> HoaDonOut:
     """Tạo đối tượng hóa đơn đầy đủ thông tin chi tiết khách, phòng, dịch vụ để hiển thị/in ấn đẹp mắt"""
     kh = pt.khach_hang if pt else None
     
@@ -74,24 +81,42 @@ def build_rich_invoice_response(hd: HoaDon, pt: PhieuThue, db: Session) -> HoaDo
     gio_tra_final = None
 
     if ct0:
-        p = db.query(Phong).filter(Phong.MaPhong == ct0.MaPhong).first()
+        p = ct0.phong if hasattr(ct0, "phong") and ct0.phong else None
+        if not p:
+            p = db.query(Phong).filter(Phong.MaPhong == ct0.MaPhong).first()
         if p:
             so_phong = p.SoPhong
-            lp = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == p.MaLoaiPhong).first()
+            lp = p.loai_phong if hasattr(p, "loai_phong") and p.loai_phong else None
+            if not lp:
+                lp = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == p.MaLoaiPhong).first()
             if lp:
                 ten_loai_phong = lp.TenLoai
-        _, thoi_gian_str, gio_tra_final = calculate_room_charge(ct0, pt.TrangThai)
+        _, thoi_gian_str, gio_tra_final = calculate_room_charge(ct0, pt.TrangThai if pt else "")
 
-    # 3. Thông tin nhân viên lập
-    nv = db.query(NhanVien).filter(NhanVien.MaNV == hd.MaNV).first()
-    nv_name = f"{nv.HoTen} ({nv.ChucVu})" if nv else f"Nhân viên ({hd.MaNV})"
+    # 3. Thông tin nhân viên lập (ưu tiên từ staff_map để không query lại)
+    if staff_map is not None:
+        nv_name = staff_map.get(hd.MaNV, f"Nhân viên ({hd.MaNV})")
+    else:
+        nv = db.query(NhanVien).filter(NhanVien.MaNV == hd.MaNV).first()
+        nv_name = f"{nv.HoTen} ({nv.ChucVu})" if nv else f"Nhân viên ({hd.MaNV})"
 
-    # 4. Chi tiết dịch vụ đã dùng
+    # 4. Chi tiết dịch vụ đã dùng (ưu tiên từ services_map đã eager-load)
     services_list = []
     if pt:
-        used_services = db.query(DungDichVu).filter(DungDichVu.MaPhieuThue == pt.MaPhieuThue).all()
+        if services_map is not None:
+            used_services = services_map.get(pt.MaPhieuThue, [])
+        else:
+            used_services = (
+                db.query(DungDichVu)
+                .options(joinedload(DungDichVu.dich_vu))
+                .filter(DungDichVu.MaPhieuThue == pt.MaPhieuThue)
+                .all()
+            )
+
         for us in used_services:
-            dv = db.query(DichVu).filter(DichVu.MaDichVu == us.MaDichVu).first()
+            dv = us.dich_vu if hasattr(us, "dich_vu") and us.dich_vu else None
+            if not dv:
+                dv = db.query(DichVu).filter(DichVu.MaDichVu == us.MaDichVu).first()
             try:
                 dg = float(us.DonGiaApDung if us.DonGiaApDung is not None else (dv.DonGia if dv else 0))
             except (ValueError, TypeError):
@@ -152,17 +177,66 @@ def build_rich_invoice_response(hd: HoaDon, pt: PhieuThue, db: Session) -> HoaDo
 
 @router.get("", response_model=List[HoaDonOut])
 def list_invoices(db: Session = Depends(get_db)):
-    invoices = db.query(HoaDon).order_by(HoaDon.NgayLap.desc()).limit(50).all()
+    # 1. Eager load toàn bộ cây quan hệ từ HoaDon -> PhieuThue -> KhachHang & ChiTiet bằng joinedload
+    invoices = (
+        db.query(HoaDon)
+        .options(
+            joinedload(HoaDon.phieu_thue)
+                .joinedload(PhieuThue.khach_hang)
+                .joinedload(KhachHang.loai_khach_hang),
+            joinedload(HoaDon.phieu_thue)
+                .joinedload(PhieuThue.khach_hang)
+                .joinedload(KhachHang.so_dien_thoai),
+            joinedload(HoaDon.phieu_thue)
+                .joinedload(PhieuThue.chi_tiet)
+                .joinedload(ChiTietPhieuThue.phong)
+                .joinedload(Phong.loai_phong),
+        )
+        .order_by(HoaDon.NgayLap.desc())
+        .limit(50)
+        .all()
+    )
+
+    if not invoices:
+        return []
+
+    # 2. Batch load trước toàn bộ nhân viên (1 query duy nhất)
+    all_staff = db.query(NhanVien).all()
+    staff_map = {nv.MaNV: f"{nv.HoTen} ({nv.ChucVu})" for nv in all_staff}
+
+    # 3. Batch load toàn bộ dịch vụ kèm joinedload(DichVu) trong 1 query duy nhất
+    pt_ids = [h.MaPhieuThue for h in invoices if h.MaPhieuThue]
+    services_map = collections.defaultdict(list)
+    if pt_ids:
+        used_services = (
+            db.query(DungDichVu)
+            .options(joinedload(DungDichVu.dich_vu))
+            .filter(DungDichVu.MaPhieuThue.in_(pt_ids))
+            .all()
+        )
+        for us in used_services:
+            services_map[us.MaPhieuThue].append(us)
+
+    # 4. Tạo kết quả hoàn toàn trong bộ nhớ (giảm từ 500+ roundtrips xuống đúng 3 queries)
     results = []
     for h in invoices:
-        pt = db.query(PhieuThue).filter(PhieuThue.MaPhieuThue == h.MaPhieuThue).first()
-        results.append(build_rich_invoice_response(h, pt, db))
+        pt = h.phieu_thue
+        results.append(build_rich_invoice_response(h, pt, db, staff_map=staff_map, services_map=services_map))
     return results
 
 @router.post("/tao-hoa-don/{ma_pt}", response_model=HoaDonOut)
 def generate_invoice(ma_pt: str, db: Session = Depends(get_db)):
-    # 1. Kiểm tra phiếu thuê
-    pt = db.query(PhieuThue).filter(PhieuThue.MaPhieuThue == ma_pt).first()
+    # 1. Kiểm tra phiếu thuê với joinedload đầy đủ
+    pt = (
+        db.query(PhieuThue)
+        .options(
+            joinedload(PhieuThue.chi_tiet).joinedload(ChiTietPhieuThue.phong).joinedload(Phong.loai_phong),
+            joinedload(PhieuThue.khach_hang).joinedload(KhachHang.loai_khach_hang),
+            joinedload(PhieuThue.khach_hang).joinedload(KhachHang.so_dien_thoai)
+        )
+        .filter(PhieuThue.MaPhieuThue == ma_pt)
+        .first()
+    )
     if not pt:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiếu thuê")
 
@@ -174,7 +248,12 @@ def generate_invoice(ma_pt: str, db: Session = Depends(get_db)):
 
     # 3. Tính tiền dịch vụ
     tien_dich_vu = 0.0
-    used_services = db.query(DungDichVu).filter(DungDichVu.MaPhieuThue == ma_pt).all()
+    used_services = (
+        db.query(DungDichVu)
+        .options(joinedload(DungDichVu.dich_vu))
+        .filter(DungDichVu.MaPhieuThue == ma_pt)
+        .all()
+    )
     for s in used_services:
         try:
             s_dg = float(s.DonGiaApDung or 0)
@@ -186,8 +265,8 @@ def generate_invoice(ma_pt: str, db: Session = Depends(get_db)):
             s_sl = 1
         tien_dich_vu += s_dg * s_sl
 
-    # 4. Tính ưu đãi khách hàng
-    kh = db.query(KhachHang).filter(KhachHang.MaKH == pt.MaKH).first()
+    # 4. Tính ưu đãi khách hàng (lấy trực tiếp từ quan hệ đã eager-load)
+    kh = pt.khach_hang
     phan_tram_uu_dai = 0.0
     if kh and kh.loai_khach_hang:
         phan_tram_uu_dai = float(kh.loai_khach_hang.PhanTramUuDai or 0)

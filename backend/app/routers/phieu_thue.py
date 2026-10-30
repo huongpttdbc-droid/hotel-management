@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.app.database import get_db
 from backend.app.models import PhieuThue, ChiTietPhieuThue, Phong, KhachHang, LoaiPhong
 from backend.app.schemas import PhieuThueOut, PhieuThueCreate, ChiTietPhieuThueOut
@@ -14,7 +14,10 @@ def list_rentals(
     limit: int = 50,
     db: Session = Depends(get_db)
 ):
-    query = db.query(PhieuThue).join(KhachHang, PhieuThue.MaKH == KhachHang.MaKH)
+    query = db.query(PhieuThue).options(
+        joinedload(PhieuThue.khach_hang),
+        joinedload(PhieuThue.chi_tiet).joinedload(ChiTietPhieuThue.phong)
+    )
 
     if trang_thai:
         query = query.filter(PhieuThue.TrangThai == trang_thai)
@@ -25,7 +28,7 @@ def list_rentals(
     for pt in rentals:
         details = []
         for ct in pt.chi_tiet:
-            p = db.query(Phong).filter(Phong.MaPhong == ct.MaPhong).first()
+            p = ct.phong
             details.append(
                 ChiTietPhieuThueOut(
                     STT=ct.STT,
@@ -159,7 +162,7 @@ def create_rental(req: PhieuThueCreate, db: Session = Depends(get_db)):
 
 @router.post("/{ma_pt}/tra-phong")
 def check_out_rental(ma_pt: str, db: Session = Depends(get_db)):
-    pt = db.query(PhieuThue).filter(PhieuThue.MaPhieuThue == ma_pt).first()
+    pt = db.query(PhieuThue).options(joinedload(PhieuThue.chi_tiet)).filter(PhieuThue.MaPhieuThue == ma_pt).first()
     if not pt:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiếu thuê")
 

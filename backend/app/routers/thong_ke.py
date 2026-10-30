@@ -1,8 +1,8 @@
 from datetime import datetime, date, timedelta
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func, case
 from backend.app.database import get_db
 from backend.app.models import Phong, KhachHang, HoaDon, LoaiPhong, PhieuThue, ChiTietPhieuThue, DungDichVu, DichVu
 from backend.app.schemas import ThongKeSummary
@@ -11,11 +11,20 @@ router = APIRouter(prefix="/thong-ke", tags=["Thống Kê Báo Cáo"])
 
 @router.get("/tong-quan", response_model=ThongKeSummary)
 def get_dashboard_summary(db: Session = Depends(get_db)):
-    tong_phong = db.query(Phong).count()
-    phong_trong = db.query(Phong).filter(Phong.TinhTrang == "Trống").count()
-    phong_dang_thue = db.query(Phong).filter(Phong.TinhTrang == "Đang thuê").count()
-    phong_dang_don = db.query(Phong).filter(Phong.TinhTrang == "Đang dọn").count()
-    phong_bao_tri = db.query(Phong).filter(Phong.TinhTrang == "Bảo trì").count()
+    # Gom 5 câu lệnh count thành 1 câu lệnh tổng hợp duy nhất
+    room_counts = db.query(
+        func.count(Phong.MaPhong).label("tong"),
+        func.count(case((Phong.TinhTrang == "Trống", 1))).label("trong"),
+        func.count(case((Phong.TinhTrang == "Đang thuê", 1))).label("dang_thue"),
+        func.count(case((Phong.TinhTrang == "Đang dọn", 1))).label("dang_don"),
+        func.count(case((Phong.TinhTrang == "Bảo trì", 1))).label("bao_tri"),
+    ).one()
+
+    tong_phong = room_counts.tong or 0
+    phong_trong = room_counts.trong or 0
+    phong_dang_thue = room_counts.dang_thue or 0
+    phong_dang_don = room_counts.dang_don or 0
+    phong_bao_tri = room_counts.bao_tri or 0
 
     tong_khach = db.query(KhachHang).count()
 
@@ -72,16 +81,33 @@ def get_detailed_revenue_report(
     now = datetime.now()
     today = date.today()
 
-    # 1. Thống kê số lượng phòng và hiện trạng
-    tong_phong = db.query(Phong).count() or 30
-    phong_trong = db.query(Phong).filter(Phong.TinhTrang == "Trống").count()
-    phong_dang_thue = db.query(Phong).filter(Phong.TinhTrang == "Đang thuê").count()
-    phong_dang_don = db.query(Phong).filter(Phong.TinhTrang == "Đang dọn").count()
-    phong_bao_tri = db.query(Phong).filter(Phong.TinhTrang == "Bảo trì").count()
+    # 1. Thống kê số lượng phòng và hiện trạng (tổng hợp 1 query duy nhất)
+    room_counts = db.query(
+        func.count(Phong.MaPhong).label("tong"),
+        func.count(case((Phong.TinhTrang == "Trống", 1))).label("trong"),
+        func.count(case((Phong.TinhTrang == "Đang thuê", 1))).label("dang_thue"),
+        func.count(case((Phong.TinhTrang == "Đang dọn", 1))).label("dang_don"),
+        func.count(case((Phong.TinhTrang == "Bảo trì", 1))).label("bao_tri"),
+    ).one()
+
+    tong_phong = room_counts.tong or 30
+    phong_trong = room_counts.trong or 0
+    phong_dang_thue = room_counts.dang_thue or 0
+    phong_dang_don = room_counts.dang_don or 0
+    phong_bao_tri = room_counts.bao_tri or 0
     tong_khach = db.query(KhachHang).count()
 
-    # 2. Lọc hóa đơn theo kỳ báo cáo
-    invoices = db.query(HoaDon).order_by(HoaDon.NgayLap.asc()).all()
+    # 2. Lọc hóa đơn theo kỳ báo cáo (eager-load quan hệ sang PhieuThue -> ChiTiet -> Phong)
+    invoices = (
+        db.query(HoaDon)
+        .options(
+            joinedload(HoaDon.phieu_thue)
+                .joinedload(PhieuThue.chi_tiet)
+                .joinedload(ChiTietPhieuThue.phong)
+        )
+        .order_by(HoaDon.NgayLap.asc())
+        .all()
+    )
 
     def filter_by_period(inv: HoaDon) -> bool:
         if not inv.NgayLap:
@@ -189,25 +215,40 @@ def get_detailed_revenue_report(
         "LP05": {"desc": "Tầng 5 - 6 (Presidential Suite 75m²)", "badge": "bg-danger-subtle text-danger border border-danger-subtle", "eval": "Ngôi sao doanh thu", "color": "#e11d48"},
     }
 
+    # Đếm số phòng và phòng đang thuê theo từng loại phòng trong 1 query tổng hợp
+    room_by_type = (
+        db.query(
+            Phong.MaLoaiPhong,
+            func.count(Phong.MaPhong).label("cnt_rooms"),
+            func.count(case((Phong.TinhTrang == "Đang thuê", 1))).label("dang_thue")
+        )
+        .group_by(Phong.MaLoaiPhong)
+        .all()
+    )
+    room_by_type_map = {r.MaLoaiPhong: (r.cnt_rooms, r.dang_thue) for r in room_by_type}
+
+    # Tính doanh thu & số lượt thuê của từng loại phòng trong 1 lượt duyệt bộ nhớ (loại bỏ N+1 query)
+    type_rev_map = defaultdict(float)
+    type_nights_map = defaultdict(int)
+    for h in paid_invoices:
+        pt = h.phieu_thue
+        if pt and pt.chi_tiet:
+            ct0 = pt.chi_tiet[0]
+            p = ct0.phong
+            if p and p.MaLoaiPhong:
+                type_rev_map[p.MaLoaiPhong] += float(h.TienPhong or 0)
+                type_nights_map[p.MaLoaiPhong] += 1
+
     tot_type_nights = 0
     tot_type_revenue = 0.0
 
     for lp in room_types:
-        cnt_rooms = db.query(Phong).filter(Phong.MaLoaiPhong == lp.MaLoaiPhong).count() or 6
-        dang_thue = db.query(Phong).filter(Phong.MaLoaiPhong == lp.MaLoaiPhong, Phong.TinhTrang == "Đang thuê").count()
+        cnt_rooms, dang_thue = room_by_type_map.get(lp.MaLoaiPhong, (6, 0))
         type_occ = round((dang_thue / cnt_rooms * 100), 1) if cnt_rooms > 0 else 0.0
 
-        # Doanh thu thực thu của loại phòng này từ các hóa đơn đã thanh toán
-        type_rev = 0.0
-        type_nights = 0
-        for h in paid_invoices:
-            pt = db.query(PhieuThue).filter(PhieuThue.MaPhieuThue == h.MaPhieuThue).first()
-            if pt and pt.chi_tiet:
-                ct0 = pt.chi_tiet[0]
-                p = db.query(Phong).filter(Phong.MaPhong == ct0.MaPhong).first()
-                if p and p.MaLoaiPhong == lp.MaLoaiPhong:
-                    type_rev += float(h.TienPhong or 0)
-                    type_nights += 1
+        # Doanh thu thực thu của loại phòng này lấy từ map trong bộ nhớ
+        type_rev = type_rev_map[lp.MaLoaiPhong]
+        type_nights = type_nights_map[lp.MaLoaiPhong]
 
         tot_type_nights += type_nights
         tot_type_revenue += type_rev

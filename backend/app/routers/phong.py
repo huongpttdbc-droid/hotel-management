@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from backend.app.database import get_db
 from backend.app.models import Phong, LoaiPhong, PhieuThue, ChiTietPhieuThue, KhachHang
@@ -14,7 +14,8 @@ def list_rooms(
     tinh_trang: Optional[str] = Query(None, description="Lọc theo tình trạng"),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Phong).join(LoaiPhong, Phong.MaLoaiPhong == LoaiPhong.MaLoaiPhong)
+    # Eager load loai_phong bằng joinedload để loại bỏ N+1 query
+    query = db.query(Phong).options(joinedload(Phong.loai_phong))
 
     if tang is not None:
         query = query.filter(Phong.Tang == tang)
@@ -22,29 +23,29 @@ def list_rooms(
         query = query.filter(Phong.TinhTrang == tinh_trang)
 
     rooms = query.order_by(Phong.Tang.asc(), Phong.SoPhong.asc()).all()
-    results = []
 
-    for r in rooms:
-        khach_hien_tai = None
-        ma_phieu_thue = None
-
-        if r.TinhTrang == "Đang thuê":
-            # Tìm thông tin khách đang ở phòng này
-            latest_rent = (
-                db.query(KhachHang.HoTen, PhieuThue.MaPhieuThue)
-                .join(PhieuThue, KhachHang.MaKH == PhieuThue.MaKH)
-                .join(ChiTietPhieuThue, PhieuThue.MaPhieuThue == ChiTietPhieuThue.MaPhieuThue)
-                .filter(
-                    ChiTietPhieuThue.MaPhong == r.MaPhong,
-                    PhieuThue.TrangThai == "Đang thuê"
-                )
-                .order_by(ChiTietPhieuThue.GioNhan.desc())
-                .first()
+    # Eager batch load toàn bộ thông tin khách đang thuê trong đúng 1 query duy nhất
+    rented_room_ids = [r.MaPhong for r in rooms if r.TinhTrang == "Đang thuê"]
+    current_guests = {}
+    if rented_room_ids:
+        active_rents = (
+            db.query(ChiTietPhieuThue.MaPhong, KhachHang.HoTen, PhieuThue.MaPhieuThue)
+            .join(PhieuThue, KhachHang.MaKH == PhieuThue.MaKH)
+            .join(ChiTietPhieuThue, PhieuThue.MaPhieuThue == ChiTietPhieuThue.MaPhieuThue)
+            .filter(
+                ChiTietPhieuThue.MaPhong.in_(rented_room_ids),
+                PhieuThue.TrangThai == "Đang thuê"
             )
-            if latest_rent:
-                khach_hien_tai = latest_rent[0]
-                ma_phieu_thue = latest_rent[1]
+            .order_by(ChiTietPhieuThue.GioNhan.desc())
+            .all()
+        )
+        for ma_phong, ho_ten, ma_pt in active_rents:
+            if ma_phong not in current_guests:
+                current_guests[ma_phong] = (ho_ten, ma_pt)
 
+    results = []
+    for r in rooms:
+        khach_hien_tai, ma_phieu_thue = current_guests.get(r.MaPhong, (None, None))
         results.append(
             PhongOut(
                 MaPhong=r.MaPhong,
@@ -69,7 +70,12 @@ def list_room_types(db: Session = Depends(get_db)):
 
 @router.get("/{ma_phong}", response_model=PhongOut)
 def get_room_detail(ma_phong: str, db: Session = Depends(get_db)):
-    r = db.query(Phong).filter(Phong.MaPhong == ma_phong).first()
+    r = (
+        db.query(Phong)
+        .options(joinedload(Phong.loai_phong))
+        .filter(Phong.MaPhong == ma_phong)
+        .first()
+    )
     if not r:
         raise HTTPException(status_code=404, detail=f"Không tìm thấy phòng {ma_phong}")
     
