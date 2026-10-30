@@ -1741,9 +1741,20 @@ async function payInvoiceFromModal() {
 }
 
 function printInvoice() {
-    document.body.classList.add('print-invoice-mode');
+    // 1. Tách biệt cơ chế in: Gỡ class in báo cáo nếu có và thêm class in hóa đơn
+    document.body.classList.remove('printing-report', 'print-report-mode');
+    document.body.classList.add('printing-invoice', 'print-invoice-mode');
+
+    // 2. Gỡ bỏ class sau khi in xong (sự kiện afterprint + fallback timeout)
+    const cleanup = () => {
+        document.body.classList.remove('printing-invoice', 'print-invoice-mode');
+        window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+
     setTimeout(() => {
         window.print();
+        setTimeout(cleanup, 1500);
     }, 50);
 }
 
@@ -1944,8 +1955,15 @@ function initReportDynamicLabels() {
 
 function printRevenueReport() {
     try {
-        document.body.classList.remove('print-invoice-mode');
-        document.body.classList.add('print-report-mode');
+        // Tách biệt cơ chế in: Gỡ class in hóa đơn và thêm class in báo cáo
+        document.body.classList.remove('printing-invoice', 'print-invoice-mode');
+        document.body.classList.add('printing-report', 'print-report-mode');
+
+        const cleanup = () => {
+            document.body.classList.remove('printing-report', 'print-report-mode');
+            window.removeEventListener('afterprint', cleanup);
+        };
+        window.addEventListener('afterprint', cleanup);
 
         // Đảm bảo section reports đang active và hiển thị
         if (typeof switchSection === 'function') {
@@ -1962,6 +1980,7 @@ function printRevenueReport() {
 
         setTimeout(() => {
             window.print();
+            setTimeout(cleanup, 1500);
         }, 150);
     } catch (err) {
         console.error('Lỗi khi in báo cáo:', err);
@@ -1976,11 +1995,13 @@ function printRevenueReport() {
 
 // Tự động tối ưu hóa hiển thị khi người dùng mở Print Preview (kể cả nhấn Ctrl + P)
 window.addEventListener('beforeprint', () => {
-    const invModal = document.getElementById('invoiceModal');
-    if (invModal && invModal.classList.contains('show')) {
-        document.body.classList.add('print-invoice-mode');
+    const invModal = document.getElementById('modalInvoice');
+    if (invModal && (invModal.classList.contains('show') || invModal.style.display === 'block')) {
+        document.body.classList.remove('printing-report', 'print-report-mode');
+        document.body.classList.add('printing-invoice', 'print-invoice-mode');
     } else {
-        document.body.classList.remove('print-invoice-mode');
+        document.body.classList.remove('printing-invoice', 'print-invoice-mode');
+        document.body.classList.add('printing-report', 'print-report-mode');
         if (typeof chartDailyInstance !== 'undefined' && chartDailyInstance) {
             chartDailyInstance.resize();
         }
@@ -1991,8 +2012,7 @@ window.addEventListener('beforeprint', () => {
 });
 
 window.addEventListener('afterprint', () => {
-    document.body.classList.remove('print-invoice-mode');
-    document.body.classList.remove('print-report-mode');
+    document.body.classList.remove('printing-invoice', 'print-invoice-mode', 'printing-report', 'print-report-mode');
 });
 
 function switchReportView(mode) {

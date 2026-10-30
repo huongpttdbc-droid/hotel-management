@@ -800,28 +800,163 @@ thead.text-muted th,
     }
 
     /* ==========================================================================
-       TRƯỜNG HỢP 1: IN BÁO CÁO DOANH THU (LUXURY REVENUE REPORT PRINT)
+       TRƯỜNG HỢP 1: IN HÓA ĐƠN KHÁCH SẠN TỪ MODAL (body.printing-invoice)
        ========================================================================== */
-    body:not(.print-invoice-mode) .sidebar,
-    body:not(.print-invoice-mode) .top-bar,
-    body:not(.print-invoice-mode) .content-section:not(#section-reports),
-    body:not(.print-invoice-mode) .time-filter-btn,
-    body:not(.print-invoice-mode) .btn,
-    body:not(.print-invoice-mode) button,
-    body:not(.print-invoice-mode) #roomCategorySearch,
-    body:not(.print-invoice-mode) .input-group,
-    body:not(.print-invoice-mode) #viewBtnCeo,
-    body:not(.print-invoice-mode) #viewBtnManager,
-    body:not(.print-invoice-mode) .filter-btn,
-    body:not(.print-invoice-mode) .modal,
-    body:not(.print-invoice-mode) .swal2-container,
-    body:not(.print-invoice-mode) .tooltip-box,
-    body:not(.print-invoice-mode) .border-start {
+    body.printing-invoice,
+    body.print-invoice-mode {
+        background: #FFFFFF !important;
+    }
+
+    /* Ẩn tất cả mọi thứ khi in hóa đơn theo yêu cầu */
+    body.printing-invoice *,
+    body.print-invoice-mode * {
+        visibility: hidden;
+    }
+
+    /* Triệt tiêu hoàn toàn các section khác để không chiếm diện tích */
+    body.printing-invoice #section-reports,
+    body.print-invoice-mode #section-reports,
+    body.printing-invoice .sidebar,
+    body.print-invoice-mode .sidebar,
+    body.printing-invoice .top-bar,
+    body.print-invoice-mode .top-bar,
+    body.printing-invoice .container-fluid,
+    body.print-invoice-mode .container-fluid,
+    body.printing-invoice .main-content,
+    body.print-invoice-mode .main-content,
+    body.printing-invoice .content-section,
+    body.print-invoice-mode .content-section {
         display: none !important;
     }
 
-    /* Vùng Báo Cáo Doanh Thu hiển thị trọn vẹn 100% */
-    body:not(.print-invoice-mode) #section-reports {
+    /* Căn chỉnh modal hóa đơn (#modalInvoice) ra góc trên cùng bên trái */
+    body.printing-invoice #modalInvoice,
+    body.print-invoice-mode #modalInvoice {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: transparent !important;
+        z-index: 99999 !important;
+    }
+
+    body.printing-invoice #modalInvoice .modal-dialog,
+    body.print-invoice-mode #modalInvoice .modal-dialog {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        transform: none !important;
+    }
+
+    /* CHỈ cho phép hiển thị nội dung của modal hóa đơn (#modalInvoice .modal-content) */
+    body.printing-invoice #modalInvoice .modal-content,
+    body.printing-invoice #modalInvoice .modal-content *,
+    body.print-invoice-mode #modalInvoice .modal-content,
+    body.print-invoice-mode #modalInvoice .modal-content * {
+        visibility: visible !important;
+    }
+
+    body.printing-invoice #modalInvoice .modal-content,
+    body.print-invoice-mode #modalInvoice .modal-content {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #FFFFFF !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ẩn nút đóng (header) và các nút bấm thanh toán (footer) của modal */
+    body.printing-invoice #modalInvoice .modal-header,
+    body.printing-invoice #modalInvoice .modal-footer,
+    body.print-invoice-mode #modalInvoice .modal-header,
+    body.print-invoice-mode #modalInvoice .modal-footer {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    body.printing-invoice #modalInvoice .modal-body,
+    body.print-invoice-mode #modalInvoice .modal-body {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #FFFFFF !important;
+    }
+
+    body.printing-invoice #printable-invoice,
+    body.print-invoice-mode #printable-invoice {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #FFFFFF !important;
+    }
+
+    body.printing-invoice #printable-invoice *,
+    body.print-invoice-mode #printable-invoice * {
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Khi không ở chế độ in hóa đơn, ẩn hoàn toàn #modalInvoice */
+    body:not(.printing-invoice):not(.print-invoice-mode) #modalInvoice {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* ==========================================================================
+       TRƯỜNG HỢP 2: IN BÁO CÁO DOANH THU (body.printing-report)
+       ========================================================================== */
+    body.printing-report .sidebar,
+    body.printing-report .top-bar,
+    body.printing-report .content-section:not(#section-reports),
+    body.printing-report .time-filter-btn,
+    body.printing-report .btn,
+    body.printing-report button,
+    body.printing-report #roomCategorySearch,
+    body.printing-report .input-group,
+    body.printing-report #viewBtnCeo,
+    body.printing-report #viewBtnManager,
+    body.printing-report .filter-btn,
+    body.printing-report .modal,
+    body.printing-report #modalInvoice,
+    body.printing-report .swal2-container,
+    body.printing-report .tooltip-box,
+    body.printing-report .border-start,
+    body.print-report-mode .sidebar,
+    body.print-report-mode .top-bar,
+    body.print-report-mode .content-section:not(#section-reports),
+    body.print-report-mode .time-filter-btn,
+    body.print-report-mode .btn,
+    body.print-report-mode button,
+    body.print-report-mode #roomCategorySearch,
+    body.print-report-mode .input-group,
+    body.print-report-mode #viewBtnCeo,
+    body.print-report-mode #viewBtnManager,
+    body.print-report-mode .filter-btn,
+    body.print-report-mode .modal,
+    body.print-report-mode #modalInvoice,
+    body.print-report-mode .swal2-container,
+    body.print-report-mode .tooltip-box,
+    body.print-report-mode .border-start {
+        display: none !important;
+    }
+
+    /* Vùng Báo Cáo Doanh Thu hiển thị trọn vẹn 100% khi in báo cáo */
+    body.printing-report #section-reports,
+    body.print-report-mode #section-reports {
         display: block !important;
         visibility: visible !important;
         width: 100% !important;
@@ -832,7 +967,8 @@ thead.text-muted th,
         background: #FFFFFF !important;
     }
 
-    body:not(.print-invoice-mode) #section-reports * {
+    body.printing-report #section-reports *,
+    body.print-report-mode #section-reports * {
         visibility: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -965,57 +1101,5 @@ thead.text-muted th,
 
     .progress-bar.bg-warning {
         background-color: #F59E0B !important;
-    }
-
-    /* ==========================================================================
-       TRƯỜNG HỢP 2: IN HÓA ĐƠN KHÁCH SẠN TỪ MODAL (print-invoice-mode)
-       ========================================================================== */
-    body.print-invoice-mode .container-fluid,
-    body.print-invoice-mode .sidebar,
-    body.print-invoice-mode .top-bar,
-    body.print-invoice-mode .main-content,
-    body.print-invoice-mode .content-section {
-        display: none !important;
-    }
-
-    body.print-invoice-mode #invoiceModal {
-        display: block !important;
-        position: static !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: visible !important;
-        background: #FFFFFF !important;
-    }
-
-    body.print-invoice-mode #invoiceModal .modal-dialog {
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    body.print-invoice-mode #invoiceModal .modal-content {
-        border: none !important;
-        box-shadow: none !important;
-        background: #FFFFFF !important;
-    }
-
-    body.print-invoice-mode #invoiceModal .modal-header,
-    body.print-invoice-mode #invoiceModal .modal-footer {
-        display: none !important;
-    }
-
-    body.print-invoice-mode #printable-invoice {
-        display: block !important;
-        visibility: visible !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #FFFFFF !important;
-    }
-
-    body.print-invoice-mode #printable-invoice * {
-        visibility: visible !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
     }
 }
