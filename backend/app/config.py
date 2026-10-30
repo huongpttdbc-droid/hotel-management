@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
         "mssql+pyodbc://localhost\\SQLEXPRESS01/QuanLyKhachSan?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes&Trusted_Connection=yes"
-    )
+    ).strip().strip("\"'")
 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "hotel-management-secret-key-2026")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
