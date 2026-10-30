@@ -118,6 +118,23 @@ const RentalAPI = {
         return apiRequest(`/phieu-thue/${maPT}/tra-phong`, {
             method: 'POST'
         });
+    },
+    cancelByAdmin: (maPT) => {
+        return apiRequest(`/phieu-thue/${maPT}/huy`, {
+            method: 'POST'
+        });
+    },
+    cancelByCustomer: (maPT, phone) => {
+        return apiRequest('/phieu-thue/khach-huy', {
+            method: 'POST',
+            body: JSON.stringify({ MaPhieuThue: maPT, SoDienThoai: phone })
+        });
+    },
+    lookup: (maPT, phone) => {
+        return apiRequest('/phieu-thue/tra-cuu', {
+            method: 'POST',
+            body: JSON.stringify({ MaPhieuThue: maPT, SoDienThoai: phone })
+        });
     }
 };
 

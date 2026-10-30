@@ -34,7 +34,7 @@ def list_rooms(
             .join(ChiTietPhieuThue, PhieuThue.MaPhieuThue == ChiTietPhieuThue.MaPhieuThue)
             .filter(
                 ChiTietPhieuThue.MaPhong.in_(rented_room_ids),
-                PhieuThue.TrangThai == "Đang thuê"
+                PhieuThue.TrangThai.in_(["Đang thuê", "Đã đặt"])
             )
             .order_by(ChiTietPhieuThue.GioNhan.desc())
             .all()

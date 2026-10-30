@@ -1406,19 +1406,46 @@ async function loadRentals(force = false) {
             const gioNhan = ct ? formatDateTime(ct.GioNhan) : '—';
             const gioTra = ct ? formatDateTime(ct.GioTraDuKien) : '—';
 
-            let badgeStatus = 'bg-success';
-            if (pt.TrangThai === 'Hoàn tất') badgeStatus = 'bg-secondary';
+            let badgeStatus = 'bg-primary';
+            if (pt.TrangThai === 'Đã đặt') badgeStatus = 'bg-warning text-dark';
+            else if (pt.TrangThai === 'Hoàn tất') badgeStatus = 'bg-secondary';
             else if (pt.TrangThai === 'Đã hủy') badgeStatus = 'bg-danger';
+
+            // Chi tiết dịch vụ khách đã đặt từ booking online
+            let servicesBadge = '';
+            if (pt.DichVu && pt.DichVu.length > 0) {
+                const sNames = pt.DichVu.map(d => `${d.TenDichVu} (x${d.SoLuong})`).join(', ');
+                servicesBadge = `
+                    <div class="mt-1 small text-info" title="Dịch vụ đặt kèm: ${sNames}">
+                        <i class="fa-solid fa-bell-concierge me-1"></i>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle" style="white-space: normal; text-align: left;">
+                            ${sNames}
+                        </span>
+                    </div>
+                `;
+            }
+
+            // Thông tin liên hệ & địa chỉ khách hàng
+            let custSub = '';
+            if (pt.SoDienThoai || pt.DiaChi) {
+                custSub = `<div class="small text-muted">${pt.SoDienThoai || ''} ${pt.DiaChi ? `· ${pt.DiaChi}` : ''}</div>`;
+            }
 
             return `
                 <tr>
-                    <td class="fw-bold">${pt.MaPhieuThue}</td>
-                    <td>${pt.TenKhachHang || pt.MaKH}</td>
-                    <td>${phongStr}</td>
+                    <td class="fw-bold text-dark">${pt.MaPhieuThue}</td>
+                    <td>
+                        <div class="fw-semibold text-dark">${pt.TenKhachHang || pt.MaKH}</div>
+                        ${custSub}
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-primary">${phongStr}</div>
+                        ${servicesBadge}
+                    </td>
                     <td><span class="badge bg-light text-dark border">${hinhThuc}</span></td>
                     <td class="small">${gioNhan}</td>
                     <td class="small">${gioTra}</td>
-                    <td><span class="badge ${badgeStatus}">${pt.TrangThai}</span></td>
+                    <td class="text-center"><span class="badge ${badgeStatus}">${pt.TrangThai}</span></td>
                     <td class="text-center align-middle" style="white-space: nowrap;">
                         <div class="d-flex align-items-center justify-content-center" style="gap: 8px;">
                             ${pt.TrangThai === 'Đang thuê' ? `
@@ -1428,11 +1455,18 @@ async function loadRentals(force = false) {
                                 <button class="btn btn-sm btn-outline-primary action-btn-fixed" onclick="createInvoice('${pt.MaPhieuThue}')" title="Xuất hóa đơn thanh toán">
                                     <i class="fa-solid fa-receipt me-1"></i>Xuất HĐ
                                 </button>
+                            ` : (pt.TrangThai === 'Đã đặt' ? `
+                                <button class="btn btn-sm btn-outline-danger action-btn-fixed" onclick="cancelRentalAdmin('${pt.MaPhieuThue}')" title="Hủy phiếu giữ chỗ">
+                                    <i class="fa-solid fa-ban me-1"></i>Hủy phiếu
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary action-btn-fixed" onclick="createInvoice('${pt.MaPhieuThue}')" title="Xuất hóa đơn">
+                                    <i class="fa-solid fa-receipt me-1"></i>Xuất HĐ
+                                </button>
                             ` : `
                                 <button class="btn btn-sm btn-outline-secondary action-btn-fixed" onclick="createInvoice('${pt.MaPhieuThue}')" title="Xem hóa đơn">
                                     <i class="fa-solid fa-receipt me-1"></i>Xem HĐ
                                 </button>
-                            `}
+                            `)}
                         </div>
                     </td>
                 </tr>
@@ -1444,6 +1478,29 @@ async function loadRentals(force = false) {
             tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Lỗi tải danh sách phiếu thuê: ${err.message}</td></tr>`;
         }
         Swal.fire('Lỗi', err.message, 'error');
+    }
+}
+
+async function cancelRentalAdmin(maPT) {
+    const confirm = await Swal.fire({
+        title: 'Hủy phiếu thuê/đặt phòng?',
+        text: `Xác nhận hủy phiếu ${maPT}? Phòng sẽ được giải phóng về trạng thái Trống.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Đồng ý hủy',
+        cancelButtonText: 'Không'
+    });
+    if (confirm.isConfirmed) {
+        try {
+            await RentalAPI.cancelByAdmin(maPT);
+            Swal.fire('Thành công', `Đã hủy phiếu ${maPT} và giải phóng phòng thành công!`, 'success');
+            loadRentals(true);
+            loadDashboardRooms(true);
+        } catch (err) {
+            Swal.fire('Lỗi', err.message, 'error');
+        }
     }
 }
 
