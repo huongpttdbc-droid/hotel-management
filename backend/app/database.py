@@ -193,9 +193,10 @@ elif "pymssql" in DATABASE_URL:
     engine_kwargs["pool_recycle"] = 300
 elif "postgresql" in DATABASE_URL or "postgres" in DATABASE_URL:
     connect_args["connect_timeout"] = 10
-    engine_kwargs["pool_recycle"] = 300
-    engine_kwargs["pool_size"] = 10
-    engine_kwargs["max_overflow"] = 20
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 5
+    engine_kwargs["pool_timeout"] = 30
+    engine_kwargs["pool_recycle"] = 1800
 
 engine_kwargs["connect_args"] = connect_args
 
