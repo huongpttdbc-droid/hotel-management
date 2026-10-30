@@ -35,25 +35,25 @@
                 </div>
             </div>
             <div class="nav flex-column mt-3">
-                <a class="nav-link active" onclick="switchSection('dashboard')">
+                <a class="nav-link active" id="nav-dashboard" data-section="dashboard" role="button">
                     <i class="fa-solid fa-grip"></i> Sơ Đồ Phòng
                 </a>
-                <a class="nav-link" onclick="switchSection('rentals')">
+                <a class="nav-link" id="nav-rentals" data-section="rentals" role="button">
                     <i class="fa-solid fa-calendar-check"></i> Đặt & Thuê Phòng
                 </a>
-                <a class="nav-link" onclick="switchSection('invoices')">
+                <a class="nav-link" id="nav-invoices" data-section="invoices" role="button">
                     <i class="fa-solid fa-file-invoice-dollar"></i> Hóa Đơn & Thu Tiền
                 </a>
-                <a class="nav-link" onclick="switchSection('services')">
+                <a class="nav-link" id="nav-services" data-section="services" role="button">
                     <i class="fa-solid fa-concierge-bell"></i> Dịch Vụ Khách Sạn
                 </a>
-                <a class="nav-link" onclick="switchSection('customers')">
+                <a class="nav-link" id="nav-customers" data-section="customers" role="button">
                     <i class="fa-solid fa-users"></i> Quản Lý Khách Hàng
                 </a>
-                <a class="nav-link d-none" id="nav-reports" onclick="switchSection('reports')">
+                <a class="nav-link d-none" id="nav-reports" data-section="reports" role="button">
                     <i class="fa-solid fa-chart-line"></i> Báo Cáo Doanh Thu
                 </a>
-                <a class="nav-link d-none" id="nav-staff" onclick="switchSection('staff')">
+                <a class="nav-link d-none" id="nav-staff" data-section="staff" role="button">
                     <i class="fa-solid fa-user-shield"></i> Quản Trị Nhân Sự
                 </a>
                 <hr class="border-light-subtle mx-3 my-2">
@@ -1043,12 +1043,39 @@ let allServices = [];
 
 let currentUser = null;
 
+// Trạng thái theo dõi Lazy Loading (Chỉ gọi API khi người dùng mở tab)
+const loadedTabs = {
+    dashboard: false,
+    rentals: false,
+    invoices: false,
+    services: false,
+    customers: false,
+    reports: false,
+    staff: false
+};
+
 // Khởi chạy khi load trang
 document.addEventListener('DOMContentLoaded', () => {
     initCurrentUser();
+    initSidebarNavigation();
+    // Khi vừa vào trang, CHỈ gọi API lấy thống kê tổng quan và Sơ đồ phòng (tab mặc định)
     loadDashboard();
     initReportDynamicLabels();
 });
+
+// Gắn sự kiện (Event Listener) vào các nút menu
+function initSidebarNavigation() {
+    const navLinks = document.querySelectorAll('.sidebar .nav-link[data-section]');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            if (section) {
+                switchSection(section, e);
+            }
+        });
+    });
+}
 
 function initCurrentUser() {
     const userStr = localStorage.getItem('hotel_user');
@@ -1112,8 +1139,8 @@ function initCurrentUser() {
     }
 }
 
-// Chuyển tab giao diện
-function switchSection(section, evt = null) {
+// Chuyển tab giao diện & Lazy Loading
+function switchSection(section, evt = null, force = false) {
     const isManager = currentUser && (currentUser.role === 'admin' || (currentUser.chuc_vu && currentUser.chuc_vu.toLowerCase().includes('quản lý')));
 
     // Chặn lễ tân truy cập báo cáo hoặc nhân sự
@@ -1145,24 +1172,38 @@ function switchSection(section, evt = null) {
     document.getElementById('page-title').innerText = titles[section] || 'Quản Lý Khách Sạn';
 
     // Đánh dấu active sidebar
-    const activeLink = (evt && evt.currentTarget) ? evt.currentTarget : (window.event && window.event.currentTarget) ? window.event.currentTarget : document.querySelector(`.sidebar .nav-link[onclick*="'${section}'"]`);
+    const activeLink = document.querySelector(`.sidebar .nav-link[data-section="${section}"]`) 
+        || (evt && evt.currentTarget) 
+        || (window.event && window.event.currentTarget)
+        || document.querySelector(`.sidebar .nav-link[onclick*="'${section}'"]`);
     if (activeLink && activeLink.classList) activeLink.classList.add('active');
 
-    // Tải dữ liệu tương ứng
-    if (section === 'dashboard') loadDashboard();
-    else if (section === 'rentals') loadRentals();
-    else if (section === 'invoices') loadInvoices();
-    else if (section === 'services') loadServices();
-    else if (section === 'customers') loadCustomers();
-    else if (section === 'reports') {
-        initReportDynamicLabels();
-        loadReports();
+    // LAZY LOADING: Chỉ gọi API nếu tab đó chưa từng được nạp dữ liệu (hoặc khi yêu cầu làm mới)
+    if (force || !loadedTabs[section]) {
+        if (section === 'dashboard') loadDashboard(force);
+        else if (section === 'rentals') loadRentals(force);
+        else if (section === 'invoices') loadInvoices(force);
+        else if (section === 'services') loadServices(force);
+        else if (section === 'customers') loadCustomers('', force);
+        else if (section === 'reports') {
+            initReportDynamicLabels();
+            loadReports();
+        }
+        else if (section === 'staff') loadStaff(force);
     }
-    else if (section === 'staff') loadStaff();
 }
 
 // 1. Tải Sơ đồ phòng
-async function loadDashboard() {
+async function loadDashboard(force = false) {
+    const container = document.getElementById('room-grid-container');
+    if (container && (!allRooms.length || force)) {
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-2 fw-semibold">Đang tải sơ đồ phòng &amp; thống kê...</div>
+            </div>
+        `;
+    }
     try {
         const [rooms, stats] = await Promise.all([
             RoomAPI.getAll(),
@@ -1171,16 +1212,20 @@ async function loadDashboard() {
         allRooms = rooms;
 
         // Cập nhật KPI
-        document.getElementById('kpi-total-rooms').innerText = stats.tong_phong;
-        document.getElementById('kpi-empty-rooms').innerText = stats.phong_trong;
-        document.getElementById('kpi-rented-rooms').innerText = stats.phong_dang_thue;
-        document.getElementById('kpi-cleaning-rooms').innerText = stats.phong_dang_don;
+        if (document.getElementById('kpi-total-rooms')) document.getElementById('kpi-total-rooms').innerText = stats.tong_phong;
+        if (document.getElementById('kpi-empty-rooms')) document.getElementById('kpi-empty-rooms').innerText = stats.phong_trong;
+        if (document.getElementById('kpi-rented-rooms')) document.getElementById('kpi-rented-rooms').innerText = stats.phong_dang_thue;
+        if (document.getElementById('kpi-cleaning-rooms')) document.getElementById('kpi-cleaning-rooms').innerText = stats.phong_dang_don;
         if (document.getElementById('kpi-maintenance-rooms')) {
             document.getElementById('kpi-maintenance-rooms').innerText = stats.phong_bao_tri;
         }
 
         renderRooms(allRooms);
+        loadedTabs.dashboard = true;
     } catch (err) {
+        if (container) {
+            container.innerHTML = `<div class="alert alert-danger text-center py-4">Lỗi tải sơ đồ phòng: ${err.message}</div>`;
+        }
         Swal.fire('Lỗi kết nối', err.message, 'error');
     }
 }
@@ -1333,13 +1378,24 @@ async function changeStatus(maPhong, newStatus) {
 }
 
 // 2. Quản lý Phiếu thuê
-async function loadRentals() {
+async function loadRentals(force = false) {
+    const tbody = document.getElementById('rentals-table-body');
+    if (tbody && (!loadedTabs.rentals || force)) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                    Đang tải danh sách phiếu thuê...
+                </td>
+            </tr>
+        `;
+    }
     try {
         const rentals = await RentalAPI.getAll();
         allRentals = rentals;
-        const tbody = document.getElementById('rentals-table-body');
         if (!rentals.length) {
             tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">Chưa có phiếu thuê nào.</td></tr>';
+            loadedTabs.rentals = true;
             return;
         }
 
@@ -1382,7 +1438,11 @@ async function loadRentals() {
                 </tr>
             `;
         }).join('');
+        loadedTabs.rentals = true;
     } catch (err) {
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Lỗi tải danh sách phiếu thuê: ${err.message}</td></tr>`;
+        }
         Swal.fire('Lỗi', err.message, 'error');
     }
 }
@@ -1458,8 +1518,8 @@ async function submitNewRental(e) {
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
         Swal.fire('Thành công', 'Đã tạo phiếu thuê và nhận phòng thành công!', 'success');
-        loadDashboard();
-        loadRentals();
+        loadDashboard(true);
+        loadRentals(true);
     } catch (err) {
         Swal.fire('Lỗi đặt phòng', err.message, 'error');
     }
@@ -1480,8 +1540,8 @@ async function checkOut(maPT) {
         try {
             await RentalAPI.checkOut(maPT);
             Swal.fire('Hoàn tất', `Đã trả phòng phiếu ${maPT}. Phòng đã được chuyển sang trạng thái "Đang dọn".`, 'success');
-            loadDashboard();
-            loadRentals();
+            loadDashboard(true);
+            loadRentals(true);
         } catch (err) {
             Swal.fire('Lỗi', err.message, 'error');
         }
@@ -1498,12 +1558,23 @@ function formatDateTimeCompact(dtStr) {
 }
 
 // 3. Quản lý Hóa đơn
-async function loadInvoices() {
+async function loadInvoices(force = false) {
+    const tbody = document.getElementById('invoices-table-body');
+    if (tbody && (!loadedTabs.invoices || force)) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center py-4 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                    Đang tải danh sách hóa đơn...
+                </td>
+            </tr>
+        `;
+    }
     try {
         const invoices = await InvoiceAPI.getAll();
-        const tbody = document.getElementById('invoices-table-body');
         if (!invoices.length) {
             tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">Chưa có hóa đơn nào.</td></tr>';
+            loadedTabs.invoices = true;
             return;
         }
 
@@ -1540,7 +1611,11 @@ async function loadInvoices() {
                 </tr>
             `;
         }).join('');
+        loadedTabs.invoices = true;
     } catch (err) {
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">Lỗi tải danh sách hóa đơn: ${err.message}</td></tr>`;
+        }
         Swal.fire('Lỗi', err.message, 'error');
     }
 }
@@ -1561,7 +1636,7 @@ async function createInvoice(maPT) {
         renderInvoiceModal(inv);
         const modal = new bootstrap.Modal(document.getElementById('modalInvoice'));
         modal.show();
-        loadInvoices();
+        loadInvoices(true);
     } catch (err) {
         Swal.fire('Lỗi xuất hóa đơn', err.message, 'error');
     }
@@ -1657,7 +1732,7 @@ async function payInvoiceFromModal() {
             document.getElementById('inv-status-badge').innerText = 'Đã thanh toán';
             document.getElementById('btn-pay-modal').classList.add('d-none');
             Swal.fire('Thành công', `Hóa đơn ${currentInvoice.MaHD} đã thanh toán thành công!`, 'success');
-            loadInvoices();
+            loadInvoices(true);
             loadReports();
         } catch (err) {
             Swal.fire('Lỗi thanh toán', err.message, 'error');
@@ -1676,7 +1751,7 @@ async function payInvoice(maHD) {
     try {
         await InvoiceAPI.pay(maHD);
         Swal.fire('Thành công', `Hóa đơn ${maHD} đã thanh toán thành công!`, 'success');
-        loadInvoices();
+        loadInvoices(true);
         loadReports();
     } catch (err) {
         Swal.fire('Lỗi', err.message, 'error');
@@ -1684,11 +1759,21 @@ async function payInvoice(maHD) {
 }
 
 // 4. Quản lý Dịch vụ
-async function loadServices() {
+async function loadServices(force = false) {
+    const tbody = document.getElementById('services-table-body');
+    if (tbody && (!loadedTabs.services || force)) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                    Đang tải danh mục dịch vụ...
+                </td>
+            </tr>
+        `;
+    }
     try {
         const services = await ServiceAPI.getAll();
         allServices = services;
-        const tbody = document.getElementById('services-table-body');
         tbody.innerHTML = services.map(s => `
             <tr>
                 <td class="fw-bold">${s.MaDichVu}</td>
@@ -1698,7 +1783,11 @@ async function loadServices() {
                 <td class="small text-muted">${s.MoTa || '—'}</td>
             </tr>
         `).join('');
+        loadedTabs.services = true;
     } catch (err) {
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Lỗi tải danh mục dịch vụ: ${err.message}</td></tr>`;
+        }
         Swal.fire('Lỗi', err.message, 'error');
     }
 }
@@ -1752,13 +1841,24 @@ async function submitUseService(e) {
 }
 
 // 5. Quản lý Khách hàng
-async function loadCustomers(keyword = '') {
+async function loadCustomers(keyword = '', force = false) {
+    const tbody = document.getElementById('customers-table-body');
+    if (tbody && (!loadedTabs.customers || force || keyword)) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                    Đang tải danh sách khách hàng...
+                </td>
+            </tr>
+        `;
+    }
     try {
         const customers = await CustomerAPI.getAll(keyword);
         allCustomers = customers;
-        const tbody = document.getElementById('customers-table-body');
         if (!customers.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">Không tìm thấy khách hàng.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">Không tìm thấy khách hàng nào.</td></tr>';
+            loadedTabs.customers = true;
             return;
         }
 
@@ -1774,14 +1874,18 @@ async function loadCustomers(keyword = '') {
                 <td class="text-success fw-bold">${c.PhanTramUuDai || 0}%</td>
             </tr>
         `).join('');
+        loadedTabs.customers = true;
     } catch (err) {
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Lỗi tải danh sách khách hàng: ${err.message}</td></tr>`;
+        }
         Swal.fire('Lỗi', err.message, 'error');
     }
 }
 
 function searchCustomers() {
     const kw = document.getElementById('customer-search-input').value;
-    loadCustomers(kw);
+    loadCustomers(kw, true);
 }
 
 function openNewCustomerModal() {
@@ -1803,7 +1907,7 @@ async function submitNewCustomer(e) {
         bootstrap.Modal.getInstance(document.getElementById('modalCustomer')).hide();
         Swal.fire('Thành công', 'Đã thêm khách hàng mới thành công!', 'success');
         document.getElementById('formNewCustomer').reset();
-        loadCustomers();
+        loadCustomers('', true);
     } catch (err) {
         Swal.fire('Lỗi', err.message, 'error');
     }
@@ -2250,6 +2354,8 @@ function renderRevenueCharts(data) {
             }
         });
     }
+
+    loadedTabs.reports = true;
 }
 
 function filterRoomCategoryTable() {
@@ -2286,7 +2392,18 @@ function applyDynamicPricing() {
 // 7. Quản trị Nhân sự & Tài khoản (Dành cho Quản lý)
 let allStaffList = [];
 
-async function loadStaff() {
+async function loadStaff(force = false) {
+    const tbody = document.getElementById('staff-table-body');
+    if (tbody && (!loadedTabs.staff || force)) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                    Đang tải danh sách nhân sự & tài khoản...
+                </td>
+            </tr>
+        `;
+    }
     try {
         const staff = await AuthAPI.getStaffList();
         allStaffList = Array.isArray(staff) ? staff : [];
@@ -2296,7 +2413,11 @@ async function loadStaff() {
 
         // Render danh sách theo bộ lọc hiện tại
         applyStaffFilters();
+        loadedTabs.staff = true;
     } catch (err) {
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Lỗi nạp nhân sự: ${err.message}</td></tr>`;
+        }
         Swal.fire('Lỗi nạp nhân sự', err.message, 'error');
     }
 }
