@@ -120,6 +120,11 @@ const RentalAPI = {
             method: 'POST'
         });
     },
+    checkIn: (maPT) => {
+        return apiRequest(`/phieu-thue/${maPT}/nhan-phong`, {
+            method: 'POST'
+        });
+    },
     cancelByAdmin: (maPT) => {
         return apiRequest(`/phieu-thue/${maPT}/huy`, {
             method: 'POST'

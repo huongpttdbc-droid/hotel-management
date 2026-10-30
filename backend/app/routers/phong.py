@@ -29,7 +29,7 @@ def list_rooms(
     current_guests = {}
     if rented_room_ids:
         active_rents = (
-            db.query(ChiTietPhieuThue.MaPhong, KhachHang.HoTen, PhieuThue.MaPhieuThue)
+            db.query(ChiTietPhieuThue.MaPhong, KhachHang.HoTen, PhieuThue.MaPhieuThue, PhieuThue.TrangThai)
             .join(PhieuThue, KhachHang.MaKH == PhieuThue.MaKH)
             .join(ChiTietPhieuThue, PhieuThue.MaPhieuThue == ChiTietPhieuThue.MaPhieuThue)
             .filter(
@@ -39,13 +39,13 @@ def list_rooms(
             .order_by(ChiTietPhieuThue.GioNhan.desc())
             .all()
         )
-        for ma_phong, ho_ten, ma_pt in active_rents:
+        for ma_phong, ho_ten, ma_pt, tt_pt in active_rents:
             if ma_phong not in current_guests:
-                current_guests[ma_phong] = (ho_ten, ma_pt)
+                current_guests[ma_phong] = (ho_ten, ma_pt, tt_pt)
 
     results = []
     for r in rooms:
-        khach_hien_tai, ma_phieu_thue = current_guests.get(r.MaPhong, (None, None))
+        khach_hien_tai, ma_phieu_thue, trang_thai_phieu = current_guests.get(r.MaPhong, (None, None, None))
         results.append(
             PhongOut(
                 MaPhong=r.MaPhong,
@@ -57,7 +57,8 @@ def list_rooms(
                 SucChua=r.loai_phong.SucChua if r.loai_phong else None,
                 DonGiaTheoNgay=float(r.loai_phong.DonGiaTheoNgay) if r.loai_phong else 0.0,
                 KhachHienTai=khach_hien_tai,
-                MaPhieuThue=ma_phieu_thue
+                MaPhieuThue=ma_phieu_thue,
+                TrangThaiPhieu=trang_thai_phieu
             )
         )
 

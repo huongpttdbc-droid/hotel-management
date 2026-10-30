@@ -456,6 +456,54 @@ def check_out_rental(ma_pt: str, db: Session = Depends(get_db)):
 
     return {"message": f"Đã trả phòng thành công cho phiếu thuê {ma_pt}. Các phòng đã được chuyển sang trạng thái 'Đang dọn'."}
 
+@router.post("/{ma_pt}/nhan-phong")
+def check_in_rental(ma_pt: str, db: Session = Depends(get_db)):
+    """API Làm thủ tục Nhận phòng (Check-in) cho phiếu thuê đang ở trạng thái 'Đã đặt'"""
+    pt = (
+        db.query(PhieuThue)
+        .options(
+            joinedload(PhieuThue.chi_tiet).joinedload(ChiTietPhieuThue.phong),
+            joinedload(PhieuThue.khach_hang)
+        )
+        .filter(PhieuThue.MaPhieuThue == ma_pt)
+        .first()
+    )
+    if not pt:
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy phiếu thuê {ma_pt}")
+
+    if pt.TrangThai == "Đang thuê":
+        raise HTTPException(status_code=400, detail=f"Phiếu thuê {ma_pt} đã được nhận phòng trước đó (đang ở trạng thái 'Đang thuê').")
+
+    if pt.TrangThai in ["Hoàn tất", "Đã hủy"]:
+        raise HTTPException(status_code=400, detail=f"Không thể nhận phòng cho phiếu đã ở trạng thái '{pt.TrangThai}'.")
+
+    now = datetime.now()
+    pt.TrangThai = "Đang thuê"
+
+    # Cập nhật thời gian nhận phòng thực tế và đảm bảo các phòng ở trạng thái 'Đang thuê'
+    for ct in pt.chi_tiet:
+        ct.GioNhan = now
+        p = ct.phong
+        if p:
+            p.TinhTrang = "Đang thuê"
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Không thể làm thủ tục nhận phòng: {e.orig if hasattr(e, 'orig') else e}")
+
+    ten_kh = pt.khach_hang.HoTen if pt.khach_hang else "Khách hàng"
+    so_phong = pt.chi_tiet[0].phong.SoPhong if (pt.chi_tiet and pt.chi_tiet[0].phong) else ""
+
+    return {
+        "success": True,
+        "message": f"Làm thủ tục nhận phòng thành công cho khách hàng {ten_kh} (Phòng {so_phong}). Trạng thái phiếu đã chuyển sang 'Đang thuê'.",
+        "MaPhieuThue": ma_pt,
+        "TrangThai": "Đang thuê",
+        "GioNhan": now
+    }
+
 @router.post("/{ma_pt}/huy")
 def cancel_rental_by_admin(ma_pt: str, db: Session = Depends(get_db)):
     """API Hủy phiếu thuê/đặt phòng dành cho nhân viên quản trị"""

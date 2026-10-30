@@ -44,6 +44,7 @@ class PhongOut(BaseModel):
     DonGiaTheoNgay: Optional[float] = None
     KhachHienTai: Optional[str] = None
     MaPhieuThue: Optional[str] = None
+    TrangThaiPhieu: Optional[str] = None
 
     class Config:
         from_attributes = True
