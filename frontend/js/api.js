@@ -1,9 +1,10 @@
 // frontend/js/api.js
 // Quản lý gọi API tới FastAPI Backend
 
-const API_BASE = (window.location.port === '5500' || window.location.protocol === 'file:')
-    ? 'http://127.0.0.1:8000/api'
-    : '/api';
+const API_BASE = (
+    window.location.protocol === 'file:' ||
+    ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '8000')
+) ? 'http://127.0.0.1:8000/api' : '/api';
 
 // Format tiền tệ VNĐ
 function formatMoney(amount) {

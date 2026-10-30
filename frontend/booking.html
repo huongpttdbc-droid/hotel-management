@@ -3,59 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt Phòng Khách Sạn Trực Tuyến - Hotel Booking</title>
+    <title>Đặt Phòng Khách Sạn Trực Tuyến - Luxury Hotel Booking</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- SweetAlert2 -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            scroll-behavior: smooth;
+        }
         .hero {
-            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.85)), url('img/VIP.jpg') center/cover;
+            background: linear-gradient(rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.88)), url('img/VIP.jpg') center/cover no-repeat;
             color: #ffffff;
-            padding: 85px 20px 95px 20px;
+            padding: 90px 20px 105px 20px;
             text-align: center;
         }
-        .room-feature { font-size: 0.9rem; color: #64748b; }
-        .price-tag { font-size: 1.35rem; font-weight: 700; color: #0284c7; }
-        .lookup-floating-card {
-            margin-top: -40px;
-            position: relative;
-            z-index: 10;
+        .section-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
         }
-        .service-select-item {
-            transition: all 0.2s ease-in-out;
+        .section-header h2 {
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .section-header p {
+            color: #64748b;
+            font-size: 1.05rem;
+        }
+        .card-custom {
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-custom:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        .room-type-img {
+            height: 220px;
+            object-fit: cover;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            width: 100%;
+        }
+        .service-item-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            transition: all 0.2s ease;
+            background-color: #ffffff;
             cursor: pointer;
         }
-        .service-select-item:hover {
-            background-color: #f8fafc;
+        .service-item-box:hover {
+            border-color: #3b82f6;
+            background-color: #f0f7ff;
         }
-        .service-select-item.selected {
-            background-color: #f0fdf4;
-            border-color: #86efac !important;
+        .service-item-box.selected {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            color: #ffffff;
+            font-weight: 700;
+            margin-right: 10px;
+            font-size: 0.95rem;
+        }
+        .badge-status-lg {
+            font-size: 0.95rem;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 700;
+        }
+        .quick-nav-pill {
+            border-radius: 30px;
+            font-weight: 600;
+            padding: 8px 20px;
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top px-3 px-md-4 shadow-sm">
-    <div class="container-fluid">
+    <div class="container">
         <a class="navbar-brand fw-bold text-info d-flex align-items-center gap-2" href="booking.html">
-            <i class="fa-solid fa-hotel"></i> LUXURY HOTEL
+            <i class="fa-solid fa-hotel fs-4"></i> LUXURY HOTEL
         </a>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-outline-info btn-sm fw-semibold" onclick="openLookupModal()">
-                <i class="fa-solid fa-magnifying-glass me-1"></i>Tra Cứu / Hủy Phòng
-            </button>
-            <a href="index.html" class="btn btn-outline-light btn-sm d-none d-sm-inline-block">
-                <i class="fa-solid fa-user-shield me-1"></i>Dành cho Nhân Viên
-            </a>
-            <a href="login.html" class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-user me-1"></i>Đăng nhập
-            </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold active" href="#section-rooms">
+                        <i class="fa-solid fa-bed me-1"></i>Hạng Phòng
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-warning" href="#section-booking">
+                        <i class="fa-solid fa-calendar-check me-1"></i>Đặt Phòng Trực Tuyến
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-info" href="#section-lookup">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Tra Cứu / Hủy Phiếu
+                    </a>
+                </li>
+                <li class="nav-item ms-lg-3">
+                    <a href="index.html" class="btn btn-outline-light btn-sm fw-semibold">
+                        <i class="fa-solid fa-user-shield me-1"></i>Dành Cho Nhân Viên
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="btn btn-primary btn-sm fw-semibold">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i>Đăng Nhập
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
@@ -63,86 +146,75 @@
 <!-- HERO -->
 <section class="hero">
     <div class="container">
-        <span class="badge bg-info text-dark px-3 py-2 rounded-pill fw-bold mb-3">
-            <i class="fa-solid fa-star text-warning me-1"></i> TIÊU CHUẨN NGHỈ DƯỠNG QUỐC TẾ
+        <span class="badge bg-info text-dark px-3 py-2 rounded-pill fw-bold mb-3 shadow-sm">
+            <i class="fa-solid fa-star text-warning me-1"></i> ĐẲNG CẤP NGHỈ DƯỠNG &amp; TIỆN NGHI HOÀN HẢO
         </span>
-        <h1 class="display-4 fw-bold mb-3">Trải Nghiệm Nghỉ Dưỡng Đẳng Cấp</h1>
-        <p class="lead text-light mb-4" style="max-width: 680px; margin: 0 auto;">
-            Không gian sang trọng, dịch vụ ẩm thực &amp; chăm sóc tận tâm. Đặt phòng trực tuyến ngay hôm nay để nhận ưu đãi tốt nhất!
+        <h1 class="display-4 fw-bold mb-3">Kỳ Nghỉ Trong Mơ Tại Luxury Hotel</h1>
+        <p class="lead text-light mb-4 mx-auto" style="max-width: 720px;">
+            Trải nghiệm không gian nghỉ dưỡng sang trọng, dịch vụ chuyên nghiệp và ẩm thực đỉnh cao. Đặt phòng trực tuyến nhanh chóng với xác nhận tức thì.
         </p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="#room-list-section" class="btn btn-primary btn-lg px-4 fw-bold shadow">
-                <i class="fa-solid fa-calendar-check me-2"></i>Khám Phá Phòng &amp; Đặt Ngay
+            <a href="#section-booking" class="btn btn-warning btn-lg px-4 fw-bold shadow">
+                <i class="fa-solid fa-calendar-plus me-2"></i>Đặt Phòng Ngay
             </a>
-            <button onclick="openLookupModal()" class="btn btn-outline-light btn-lg px-4 fw-bold shadow">
-                <i class="fa-solid fa-receipt me-2"></i>Tra Cứu Phiếu Đặt
-            </button>
+            <a href="#section-lookup" class="btn btn-outline-light btn-lg px-4 fw-bold shadow">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>Tra Cứu / Hủy Đặt Phòng
+            </a>
+            <a href="#section-rooms" class="btn btn-outline-info btn-lg px-4 fw-bold shadow">
+                <i class="fa-solid fa-bed me-2"></i>Xem Hạng Phòng
+            </a>
         </div>
     </div>
 </section>
 
-<!-- QUICK LOOKUP FLOATING BANNER -->
-<div class="container lookup-floating-card mb-5">
-    <div class="card shadow-lg border-0 rounded-4 p-3 p-md-4 bg-white">
-        <div class="row align-items-center g-3">
-            <div class="col-lg-8">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-primary-subtle text-primary p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
-                        <i class="fa-solid fa-clipboard-check fs-4"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold text-dark m-0">Quý khách đã có mã đặt phòng trước đó?</h6>
-                        <small class="text-muted">Tra cứu tiến độ phiếu, thông tin đặt phòng hoặc hủy giữ chỗ tự động bất kỳ lúc nào.</small>
-                    </div>
+<!-- MAIN CONTENT CONTAINER -->
+<div class="container my-5">
+
+    <!-- ========================================================================= -->
+    <!-- 1. KHÁM PHÁ CÁC HẠNG PHÒNG NGHỈ                                           -->
+    <!-- ========================================================================= -->
+    <section id="section-rooms" class="mb-5 pt-3">
+        <div class="section-header">
+            <h2>Các Hạng Phòng Khách Sạn</h2>
+            <p>Khám phá các lựa chọn phòng nghỉ tiện nghi, thoáng mát và đẳng cấp</p>
+        </div>
+
+        <div class="row g-4" id="room-types-grid">
+            <div class="text-center py-5 text-muted col-12">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-2 fw-semibold">Đang tải danh sách hạng phòng...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 2. KHUNG FORM ĐẶT PHÒNG TRỰC TUYẾN (DEDICATED BOOKING FORM)              -->
+    <!-- ========================================================================= -->
+    <section id="section-booking" class="mb-5 pt-4">
+        <div class="card card-custom p-4 p-md-5 border-top border-4 border-warning shadow-lg">
+            <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold text-dark m-0 d-flex align-items-center">
+                        <i class="fa-solid fa-calendar-check text-warning me-2"></i>
+                        Đặt Phòng Trực Tuyến
+                    </h2>
+                    <small class="text-muted">Điền đầy đủ thông tin bên dưới để giữ phòng và nhận xác nhận tức thì</small>
                 </div>
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+                    <i class="fa-solid fa-bolt me-1"></i> Giữ Chỗ Tức Thì
+                </span>
             </div>
-            <div class="col-lg-4 text-lg-end">
-                <button class="btn btn-outline-primary fw-bold px-4 py-2" onclick="openLookupModal()">
-                    <i class="fa-solid fa-magnifying-glass me-1"></i> Tra cứu / Hủy giữ chỗ
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- ROOM TYPES SECTION -->
-<div class="container my-5" id="room-list-section">
-    <div class="text-center mb-5">
-        <h2 class="fw-bold text-dark">Các Hạng Phòng Tại Khách Sạn</h2>
-        <p class="text-muted">Chọn hạng phòng phù hợp với nhu cầu và phong cách của bạn</p>
-    </div>
-
-    <div class="row g-4" id="room-types-grid">
-        <div class="text-center py-5 text-muted col-12">
-            <div class="spinner-border text-primary" role="status"></div>
-            <div class="mt-2">Đang tải danh sách phòng...</div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL 1: ĐẶT PHÒNG KHÁCH HÀNG (ONLINE BOOKING) -->
-<div class="modal fade" id="modalBookingOnline" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content shadow-lg border-0">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fa-solid fa-calendar-plus text-info me-2"></i>Đặt Phòng Trực Tuyến
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="formOnlineBooking" onsubmit="submitOnlineBooking(event)">
-                    <div class="alert alert-info py-2 small mb-3">
-                        <i class="fa-solid fa-circle-info me-1"></i>
-                        Đặt phòng nhanh chóng và tiện lợi. Hệ thống tự động ghi nhận phiếu và giữ phòng cho quý khách!
-                    </div>
-
-                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
-                        <i class="fa-solid fa-user me-2"></i>1. Thông Tin Khách Hàng
-                    </h6>
-                    <div class="row g-3 mb-4">
+            <form id="formOnlineBooking" onsubmit="submitOnlineBooking(event)">
+                
+                <!-- BƯỚC 1: THÔNG TIN KHÁCH HÀNG -->
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                        <span class="step-number">1</span> Thông Tin Khách Hàng
+                    </h5>
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Họ và Tên Quý Khách <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">Họ và Tên <span class="text-danger">*</span></label>
                             <input type="text" id="ob-name" class="form-control" placeholder="Nguyễn Văn A" required>
                         </div>
                         <div class="col-md-6">
@@ -150,127 +222,165 @@
                             <input type="tel" id="ob-phone" class="form-control" placeholder="0901234567" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Số CCCD / CMND (12 số) <span class="text-danger">*</span></label>
-                            <input type="text" id="ob-cccd" class="form-control" maxlength="12" pattern="[0-9]{12}" placeholder="079..." required>
+                            <label class="form-label fw-bold">Số CCCD / CMND (12 chữ số) <span class="text-danger">*</span></label>
+                            <input type="text" id="ob-cccd" class="form-control" maxlength="12" pattern="[0-9]{12}" placeholder="079123456789" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Ngày Sinh (từ 18 tuổi) <span class="text-danger">*</span></label>
                             <input type="date" id="ob-dob" class="form-control" value="1995-01-01" required>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold">Địa Chỉ Nơi Cư Trú</label>
-                            <input type="text" id="ob-address" class="form-control" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố...">
+                            <label class="form-label fw-bold">Địa Chỉ Nơi Cư Trú <span class="text-danger">*</span></label>
+                            <input type="text" id="ob-address" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..." required>
                         </div>
                     </div>
+                </div>
 
-                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
-                        <i class="fa-solid fa-bed me-2"></i>2. Thông Tin Phòng &amp; Thời Gian Nghỉ
-                    </h6>
-                    <div class="row g-3 mb-4">
+                <hr class="my-4 text-muted">
+
+                <!-- BƯỚC 2: THÔNG TIN PHÒNG & THỜI GIAN LƯU TRÚ -->
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                        <span class="step-number">2</span> Thông Tin Phòng &amp; Thời Gian Nghỉ
+                    </h5>
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Phòng Khách Sạn (còn trống) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">Chọn Phòng Còn Trống <span class="text-danger">*</span></label>
                             <select id="ob-room" class="form-select" required>
-                                <option value="">-- Đang tải phòng trống... --</option>
+                                <option value="">-- Đang tải danh sách phòng trống... --</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <label class="form-label fw-bold">Hình Thức Thuê</label>
                             <select id="ob-rent-type" class="form-select">
                                 <option value="Theo ngày" selected>Theo ngày</option>
-                                <option value="Theo giờ">Theo giờ</option>
                                 <option value="Qua đêm">Qua đêm</option>
+                                <option value="Theo giờ">Theo giờ</option>
                             </select>
                         </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Số Người Dự Kiến</label>
+                            <input type="number" id="ob-guest-count" class="form-control" value="2" min="1" max="10" required>
+                        </div>
+
+                        <!-- 2 TRƯỜNG DATETIME-LOCAL CÓ MIN CHẶN QUÁ KHỨ -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Ngày/Giờ Nhận Phòng <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="ob-checkin" class="form-control" required>
+                            <label class="form-label fw-bold">
+                                <i class="fa-regular fa-calendar-days text-primary me-1"></i> Ngày &amp; Giờ Nhận Phòng <span class="text-danger">*</span>
+                            </label>
+                            <input type="datetime-local" id="ob-checkin" class="form-control" required onchange="handleCheckinChange()">
+                            <small class="text-muted">Không thể chọn thời gian trong quá khứ.</small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Ngày/Giờ Trả Phòng Dự Kiến <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">
+                                <i class="fa-regular fa-calendar-check text-primary me-1"></i> Ngày &amp; Giờ Trả Phòng Dự Kiến <span class="text-danger">*</span>
+                            </label>
                             <input type="datetime-local" id="ob-checkout" class="form-control" required>
+                            <small class="text-muted">Thời gian trả phòng phải sau thời gian nhận phòng.</small>
                         </div>
+
                         <div class="col-12">
-                            <label class="form-label fw-bold">Ghi Chú Yêu Cầu Đặc Biệt</label>
-                            <textarea id="ob-notes" class="form-control" rows="2" placeholder="Yêu cầu phòng tầng cao, view thoáng, nhận phòng muộn..."></textarea>
+                            <label class="form-label fw-bold">Ghi Chú &amp; Yêu Cầu Đặc Biệt</label>
+                            <textarea id="ob-notes" class="form-control" rows="2" placeholder="Ví dụ: Nhận phòng muộn sau 19h, phòng tầng cao, giường phụ..."></textarea>
                         </div>
                     </div>
+                </div>
 
-                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-bell-concierge me-2"></i>3. Dịch Vụ Bổ Sung (Tùy Chọn)</span>
-                        <small class="text-muted fw-normal">Chọn để order kèm khi đặt</small>
-                    </h6>
-                    <div class="card border-0 bg-light p-3 mb-3">
-                        <div id="booking-services-list" class="row g-2" style="max-height: 220px; overflow-y: auto;">
-                            <div class="text-center py-3 text-muted col-12">
-                                <span class="spinner-border spinner-border-sm text-primary me-2"></span> Đang tải danh sách dịch vụ...
+                <hr class="my-4 text-muted">
+
+                <!-- BƯỚC 3: DỊCH VỤ ĐI KÈM (LẤY TỪ GET /api/dich-vu) -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5 class="fw-bold text-primary m-0 d-flex align-items-center">
+                            <span class="step-number">3</span> Dịch Vụ Bổ Sung (Tùy Chọn)
+                        </h5>
+                        <small class="text-muted">Tích chọn để đặt kèm các dịch vụ tiện ích của khách sạn</small>
+                    </div>
+
+                    <div class="card border bg-light-subtle p-3 rounded-4">
+                        <div id="booking-services-list" class="row g-3" style="max-height: 280px; overflow-y: auto;">
+                            <div class="text-center py-4 text-muted col-12">
+                                <span class="spinner-border spinner-border-sm text-primary me-2"></span> Đang tải danh sách dịch vụ từ cơ sở dữ liệu...
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="modal-footer px-0 pb-0 mt-4">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="submit" class="btn btn-primary fw-bold px-4" id="btn-submit-booking">
-                            <i class="fa-solid fa-check me-1"></i> Xác Nhận Đặt Phòng
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- NÚT XÁC NHẬN ĐẶT PHÒNG -->
+                <div class="text-end pt-3">
+                    <button type="submit" class="btn btn-warning btn-lg px-5 fw-bold shadow" id="btn-submit-booking">
+                        <i class="fa-solid fa-check me-2"></i> Xác Nhận Đặt Phòng
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- MODAL 2: TRA CỨU & HỦY ĐẶT PHÒNG KHÁCH HÀNG -->
-<div class="modal fade" id="modalLookupBooking" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content shadow-lg border-0">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fa-solid fa-magnifying-glass text-info me-2"></i>Tra Cứu &amp; Hủy Đặt Phòng
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <!-- ========================================================================= -->
+    <!-- 3. KHUNG GIAO DIỆN RIÊNG TRA CỨU & HỦY ĐẶT PHÒNG (DEDICATED LOOKUP)       -->
+    <!-- ========================================================================= -->
+    <section id="section-lookup" class="mb-5 pt-4">
+        <div class="card card-custom p-4 p-md-5 border-top border-4 border-info shadow-lg">
+            <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold text-dark m-0 d-flex align-items-center">
+                        <i class="fa-solid fa-magnifying-glass text-info me-2"></i>
+                        Tra Cứu &amp; Hủy Đặt Phòng Trực Tuyến
+                    </h2>
+                    <small class="text-muted">Quý khách có thể tự kiểm tra tiến độ phiếu đặt hoặc chủ động hủy phiếu khi thay đổi kế hoạch</small>
+                </div>
+                <span class="badge bg-info text-dark px-3 py-2 rounded-pill fw-bold">
+                    <i class="fa-solid fa-shield-halved me-1"></i> Xác Thực Bảo Mật
+                </span>
             </div>
-            <div class="modal-body p-4">
-                <form id="formLookupBooking" onsubmit="submitLookupBooking(event)">
-                    <div class="alert alert-secondary py-2 small mb-3">
-                        <i class="fa-solid fa-shield-halved text-primary me-1"></i>
-                        Vui lòng nhập chính xác <strong>Mã phiếu đặt</strong> và <strong>Số điện thoại</strong> đã đăng ký để hệ thống bảo mật xác thực thông tin.
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Mã Phiếu Thuê / Đặt Phòng <span class="text-danger">*</span></label>
+
+            <!-- FORM NHẬP MÃ PHIẾU VÀ SỐ ĐIỆN THOẠI -->
+            <form id="formLookupBooking" onsubmit="submitLookupBooking(event)">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">Mã Phiếu Thuê / Phiếu Đặt <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-receipt text-muted"></i></span>
                             <input type="text" id="lookup-code" class="form-control" placeholder="Ví dụ: PT261030001" required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Số Điện Thoại Đăng Ký <span class="text-danger">*</span></label>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Số Điện Thoại Đăng Ký <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-phone text-muted"></i></span>
                             <input type="tel" id="lookup-phone" class="form-control" placeholder="Ví dụ: 0901234567" required>
                         </div>
-                        <div class="col-12 text-end">
-                            <button type="submit" class="btn btn-primary fw-bold px-4" id="btn-lookup-submit">
-                                <i class="fa-solid fa-search me-1"></i> Tra Cứu Phiếu
-                            </button>
-                        </div>
                     </div>
-                </form>
-
-                <!-- KHU VỰC HIỂN THỊ KẾT QUẢ TRA CỨU -->
-                <div id="lookup-result-area" class="mt-4 pt-3 border-top d-none">
-                    <!-- Được render động bằng JavaScript -->
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-info fw-bold w-100 py-2" id="btn-lookup-submit">
+                            <i class="fa-solid fa-search me-1"></i> Tra Cứu Phiếu
+                        </button>
+                    </div>
                 </div>
+            </form>
+
+            <!-- KHU VỰC HIỂN THỊ KẾT QUẢ TRA CỨU CHI TIẾT -->
+            <div id="lookup-result-area" class="mt-4 pt-3 border-top d-none">
+                <!-- Được render động bởi JavaScript -->
             </div>
         </div>
-    </div>
+    </section>
+
 </div>
 
 <!-- FOOTER -->
 <footer class="bg-dark text-light py-4 text-center mt-5">
     <div class="container">
-        <p class="m-0 small text-secondary">© 2026 LUXURY HOTEL · Hệ thống Quản Lý &amp; Đặt Phòng Khách Sạn</p>
+        <p class="m-0 small text-secondary">
+            © 2026 LUXURY HOTEL · Hệ Thống Quản Lý &amp; Đặt Phòng Khách Sạn Cao Cấp.
+        </p>
     </div>
 </footer>
 
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="js/api.js?v=2.2"></script>
+<script src="js/api.js?v=2.4"></script>
 <script>
 const imageMap = {
     'đơn': 'img/Don.jpg',
@@ -280,21 +390,81 @@ const imageMap = {
     'vip': 'img/VIP.jpg'
 };
 
-let cachedServices = [];
+let allAvailableRooms = [];
+let allServices = [];
 
-// Khởi tạo trang
+// Chuyển đổi đối tượng Date thành định dạng YYYY-MM-DDTHH:mm cho datetime-local
+function toLocalDateTimeString(d) {
+    const pad = (n) => String(n).padStart(2, '0');
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Khởi tạo trang khi tải xong
 document.addEventListener('DOMContentLoaded', async () => {
+    initDateTimeInputs();
+    await Promise.all([
+        loadRoomTypes(),
+        loadAvailableRooms(),
+        loadServicesList()
+    ]);
+});
+
+// Cài đặt ngày giờ mặc định và ràng buộc min
+function initDateTimeInputs() {
+    const now = new Date();
+    // Giờ trả phòng mặc định = ngày hôm sau lúc 12:00 trưa
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    tomorrow.setHours(12, 0, 0, 0);
+
+    const nowStr = toLocalDateTimeString(now);
+    const checkinInput = document.getElementById('ob-checkin');
+    const checkoutInput = document.getElementById('ob-checkout');
+
+    if (checkinInput && checkoutInput) {
+        checkinInput.min = nowStr;
+        checkinInput.value = nowStr;
+
+        checkoutInput.min = nowStr;
+        checkoutInput.value = toLocalDateTimeString(tomorrow);
+    }
+}
+
+// Khi người dùng đổi ngày/giờ nhận phòng, cập nhật min của ngày trả phòng
+function handleCheckinChange() {
+    const checkinInput = document.getElementById('ob-checkin');
+    const checkoutInput = document.getElementById('ob-checkout');
+    if (checkinInput && checkoutInput && checkinInput.value) {
+        checkoutInput.min = checkinInput.value;
+        if (checkoutInput.value && checkoutInput.value <= checkinInput.value) {
+            const checkinDate = new Date(checkinInput.value);
+            const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
+            checkoutInput.value = toLocalDateTimeString(nextDay);
+        }
+    }
+}
+
+// 1. Tải danh sách các Hạng Phòng
+async function loadRoomTypes() {
+    const grid = document.getElementById('room-types-grid');
     try {
         const types = await RoomAPI.getTypes();
-        const grid = document.getElementById('room-types-grid');
+        if (!types || !types.length) {
+            grid.innerHTML = '<div class="col-12 text-center text-muted py-4">Hiện chưa có thông tin hạng phòng.</div>';
+            return;
+        }
 
         grid.innerHTML = types.map(t => {
-            const key = t.TenLoai.toLowerCase().trim();
+            const key = (t.TenLoai || '').toLowerCase().trim();
             const imgSrc = imageMap[key] || 'img/VIP.jpg';
 
             return `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card room-type-card h-100 bg-white shadow-sm border-0">
+                    <div class="card card-custom h-100 border-0">
                         <img src="${imgSrc}" class="room-type-img" alt="${t.TenLoai}">
                         <div class="card-body p-4 d-flex flex-column justify-content-between">
                             <div>
@@ -302,7 +472,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <h4 class="fw-bold m-0 text-dark">Hạng ${t.TenLoai}</h4>
                                     <span class="badge bg-primary fs-6"><i class="fa-solid fa-user me-1"></i>${t.SucChua} người</span>
                                 </div>
-                                <p class="text-muted small mb-3">${t.MoTa || 'Phòng nghỉ đầy đủ tiện nghi tiêu chuẩn cao cấp.'}</p>
+                                <p class="text-muted small mb-3">${t.MoTa || 'Không gian nghỉ dưỡng sang trọng, đầy đủ tiện nghi tiêu chuẩn quốc tế.'}</p>
                                 
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between text-muted small py-1 border-bottom">
@@ -320,8 +490,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </div>
                             </div>
                             
-                            <button class="btn btn-outline-primary fw-bold w-100 mt-2" onclick="openBookingOnline('${t.MaLoaiPhong}')">
-                                <i class="fa-solid fa-calendar-check me-2"></i>Đặt Hạng Phòng Này
+                            <button class="btn btn-outline-warning text-dark fw-bold w-100 mt-2" onclick="selectRoomType('${t.MaLoaiPhong}')">
+                                <i class="fa-solid fa-calendar-check me-2"></i>Chọn Đặt Hạng Này
                             </button>
                         </div>
                     </div>
@@ -329,38 +499,87 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         }).join('');
     } catch (err) {
-        document.getElementById('room-types-grid').innerHTML = `<div class="alert alert-danger col-12">${err.message}</div>`;
+        grid.innerHTML = `<div class="alert alert-danger col-12">${err.message}</div>`;
+    }
+}
+
+// 2. Tải danh sách phòng còn trống thực tế từ DB
+async function loadAvailableRooms() {
+    const select = document.getElementById('ob-room');
+    try {
+        const rooms = await RoomAPI.getAll(null, 'Trống');
+        allAvailableRooms = rooms || [];
+
+        if (!allAvailableRooms.length) {
+            select.innerHTML = '<option value="">-- Tất cả các phòng hiện đã kín, vui lòng liên hệ lễ tân --</option>';
+            return;
+        }
+
+        renderRoomSelectOptions(allAvailableRooms);
+    } catch (err) {
+        select.innerHTML = `<option value="">Lỗi tải danh sách phòng: ${err.message}</option>`;
+    }
+}
+
+function renderRoomSelectOptions(rooms, preselectMaPhong = '') {
+    const select = document.getElementById('ob-room');
+    if (!rooms.length) {
+        select.innerHTML = '<option value="">-- Không có phòng trống thuộc hạng phòng này --</option>';
+        return;
     }
 
-    // Tải trước danh mục dịch vụ phục vụ modal đặt phòng
-    loadOnlineServices();
-});
+    select.innerHTML = rooms.map(r => `
+        <option value="${r.MaPhong}" ${r.MaPhong === preselectMaPhong ? 'selected' : ''}>
+            Phòng ${r.SoPhong} (${r.TenLoaiPhong}) - ${formatMoney(r.DonGiaTheoNgay)}/ngày
+        </option>
+    `).join('');
+}
 
-// Tải danh sách dịch vụ cho khách chọn kèm
-async function loadOnlineServices() {
+// Khi khách bấm "Chọn Đặt Hạng Này" từ thẻ phòng
+function selectRoomType(maLoaiPhong) {
+    const targetSection = document.getElementById('section-booking');
+    if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    const filtered = allAvailableRooms.filter(r => r.MaLoaiPhong === maLoaiPhong);
+    if (filtered.length > 0) {
+        renderRoomSelectOptions(filtered, filtered[0].MaPhong);
+    } else {
+        renderRoomSelectOptions(allAvailableRooms);
+        Swal.fire({
+            icon: 'info',
+            title: 'Hạng phòng đã hết phòng trống',
+            text: 'Hiện tại hạng phòng này đã được đặt hết. Quý khách vui lòng chọn phòng còn trống khác trong danh sách nhé!'
+        });
+    }
+}
+
+// 3. Tải danh sách dịch vụ thực tế từ GET /api/dich-vu
+async function loadServicesList() {
+    const container = document.getElementById('booking-services-list');
     try {
         const services = await ServiceAPI.getAll();
-        cachedServices = services;
-        const container = document.getElementById('booking-services-list');
-        if (!container) return;
+        allServices = services || [];
 
-        if (!services || !services.length) {
+        if (!allServices.length) {
             container.innerHTML = '<div class="text-muted small p-2 col-12">Hiện không có dịch vụ nào thêm.</div>';
             return;
         }
 
-        container.innerHTML = services.map(s => `
-            <div class="col-md-6">
-                <div class="card p-2 border service-select-item" id="card-srv-${s.MaDichVu}">
+        container.innerHTML = allServices.map(s => `
+            <div class="col-md-6 col-lg-4">
+                <div class="service-item-box" id="box-srv-${s.MaDichVu}">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="form-check m-0">
-                            <input class="form-check-input srv-checkbox" type="checkbox" value="${s.MaDichVu}" id="chk-${s.MaDichVu}" onchange="toggleServiceSelection('${s.MaDichVu}')">
-                            <label class="form-check-label fw-semibold small text-dark" for="chk-${s.MaDichVu}">
+                            <input class="form-check-input srv-checkbox" type="checkbox" value="${s.MaDichVu}" id="chk-${s.MaDichVu}" onchange="toggleServiceItem('${s.MaDichVu}')">
+                            <label class="form-check-label fw-bold small text-dark" for="chk-${s.MaDichVu}">
                                 ${s.TenDichVu}
                             </label>
                             <div class="small text-muted">${formatMoney(s.DonGia)} / ${s.DonViTinh || 'lần'}</div>
                         </div>
-                        <div class="d-flex align-items-center gap-1" style="width: 80px;">
+                        <div class="d-flex align-items-center gap-1" style="width: 85px;">
+                            <span class="small text-muted">SL:</span>
                             <input type="number" id="qty-${s.MaDichVu}" class="form-control form-control-sm text-center" value="1" min="1" max="50" disabled>
                         </div>
                     </div>
@@ -368,80 +587,33 @@ async function loadOnlineServices() {
             </div>
         `).join('');
     } catch (e) {
-        console.warn('Không thể tải dịch vụ:', e);
+        container.innerHTML = `<div class="text-danger small col-12">Không thể tải danh sách dịch vụ: ${e.message}</div>`;
     }
 }
 
-function toggleServiceSelection(maDV) {
+function toggleServiceItem(maDV) {
     const chk = document.getElementById(`chk-${maDV}`);
     const qty = document.getElementById(`qty-${maDV}`);
-    const card = document.getElementById(`card-srv-${maDV}`);
-    if (chk && qty) {
+    const box = document.getElementById(`box-srv-${maDV}`);
+    if (chk && qty && box) {
         qty.disabled = !chk.checked;
         if (chk.checked) {
-            card.classList.add('selected');
+            box.classList.add('selected');
         } else {
-            card.classList.remove('selected');
+            box.classList.remove('selected');
+            qty.value = 1;
         }
     }
 }
 
-// Mở Modal đặt phòng online
-async function openBookingOnline(maLoaiPhong = '') {
-    try {
-        const rooms = await RoomAPI.getAll(null, 'Trống');
-        const select = document.getElementById('ob-room');
-        
-        let filtered = rooms;
-        if (maLoaiPhong) {
-            filtered = rooms.filter(r => r.MaLoaiPhong === maLoaiPhong);
-            if (!filtered.length) filtered = rooms; // fallback nếu hết phòng loại đó
-        }
-
-        if (!filtered.length) {
-            Swal.fire('Rất tiếc', 'Hiện tại khách sạn đã kín tất cả các phòng trống. Quý khách vui lòng liên hệ lễ tân!', 'warning');
-            return;
-        }
-
-        select.innerHTML = filtered.map(r => `
-            <option value="${r.MaPhong}">
-                Phòng ${r.SoPhong} (${r.TenLoaiPhong}) - ${formatMoney(r.DonGiaTheoNgay)}/ngày
-            </option>
-        `).join('');
-
-        // Cài đặt ngày giờ mặc định (Nhận: Bây giờ, Trả: 12h ngày hôm sau)
-        const now = new Date();
-        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        tomorrow.setHours(12, 0, 0, 0);
-
-        const formatForInput = (d) => {
-            const pad = (n) => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        };
-
-        const nowStr = formatForInput(now);
-        const checkinInput = document.getElementById('ob-checkin');
-        const checkoutInput = document.getElementById('ob-checkout');
-
-        checkinInput.min = nowStr;
-        checkoutInput.min = nowStr;
-        checkinInput.value = nowStr;
-        checkoutInput.value = formatForInput(tomorrow);
-
-        const modalEl = document.getElementById('modalBookingOnline');
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.show();
-    } catch (err) {
-        Swal.fire('Lỗi', err.message, 'error');
-    }
-}
-
-// Submit Đặt Phòng Trực Tuyến
+// =============================================================================
+// SUBMIT ĐẶT PHÒNG TRỰC TUYẾN
+// =============================================================================
 async function submitOnlineBooking(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-submit-booking');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý đặt phòng...';
 
     const name = document.getElementById('ob-name').value.trim();
     const phone = document.getElementById('ob-phone').value.trim();
@@ -450,9 +622,31 @@ async function submitOnlineBooking(e) {
     const address = document.getElementById('ob-address').value.trim();
     const maPhong = document.getElementById('ob-room').value;
     const rentType = document.getElementById('ob-rent-type').value;
+    const guestCount = parseInt(document.getElementById('ob-guest-count').value) || 2;
     const checkinVal = document.getElementById('ob-checkin').value;
     const checkoutVal = document.getElementById('ob-checkout').value;
     const notes = document.getElementById('ob-notes').value.trim();
+
+    if (!maPhong) {
+        Swal.fire('Chưa chọn phòng', 'Vui lòng chọn phòng khách sạn còn trống.', 'warning');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check me-2"></i> Xác Nhận Đặt Phòng';
+        return;
+    }
+
+    if (!checkinVal || !checkoutVal) {
+        Swal.fire('Thiếu thời gian', 'Vui lòng chọn đầy đủ ngày giờ nhận phòng và trả phòng.', 'warning');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check me-2"></i> Xác Nhận Đặt Phòng';
+        return;
+    }
+
+    if (new Date(checkoutVal) <= new Date(checkinVal)) {
+        Swal.fire('Thời gian không hợp lệ', 'Ngày/Giờ trả phòng dự kiến phải sau ngày/giờ nhận phòng.', 'warning');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check me-2"></i> Xác Nhận Đặt Phòng';
+        return;
+    }
 
     // Thu thập danh sách dịch vụ đi kèm
     const selectedServices = [];
@@ -467,77 +661,89 @@ async function submitOnlineBooking(e) {
     });
 
     try {
-        // 1. Tìm hoặc tạo khách hàng
-        let cust = null;
-        try {
-            const existing = await CustomerAPI.getAll(cccd);
-            if (existing && existing.length) cust = existing[0];
-        } catch (_) {}
-
-        if (!cust) {
-            cust = await CustomerAPI.create({
-                HoTen: name,
-                NgaySinh: dob,
-                CCCD: cccd,
-                SDT: phone,
-                DiaChi: address || 'Đặt trực tuyến'
-            });
-        }
-
-        // 2. Tạo phiếu thuê kèm giờ nhận/trả, địa chỉ và dịch vụ bổ sung
-        const res = await RentalAPI.create({
-            MaKH: cust.MaKH,
+        // Gửi trực tiếp payload lên POST /api/phieu-thue
+        // Backend hỗ trợ tự động tìm hoặc tạo khách hàng kèm trường dia_chi
+        const payload = {
+            HoTen: name,
+            SDT: phone,
+            CCCD: cccd,
+            NgaySinh: dob,
+            dia_chi: address,
             MaPhong: maPhong,
             HinhThucThue: rentType,
-            SoNguoiDuKien: 2,
-            gio_nhan: checkinVal ? new Date(checkinVal).toISOString() : null,
-            gio_tra: checkoutVal ? new Date(checkoutVal).toISOString() : null,
+            SoNguoiDuKien: guestCount,
+            gio_nhan: new Date(checkinVal).toISOString(),
+            gio_tra: new Date(checkoutVal).toISOString(),
             TrangThai: 'Đã đặt',
-            dia_chi: address,
             GhiChu: notes,
             danh_sach_dich_vu: selectedServices
-        });
+        };
 
-        bootstrap.Modal.getInstance(document.getElementById('modalBookingOnline')).hide();
-        Swal.fire({
+        const res = await RentalAPI.create(payload);
+
+        // Hiển thị thông báo thành công
+        const servicesText = (res.DichVu && res.DichVu.length) 
+            ? res.DichVu.map(d => `${d.TenDichVu} (x${d.SoLuong})`).join(', ') 
+            : 'Không';
+
+        await Swal.fire({
             icon: 'success',
             title: 'Đặt Phòng Thành Công!',
             html: `
                 <div class="text-start p-2">
                     <p class="mb-2">Kính gửi quý khách <strong>${name}</strong>,</p>
                     <div class="alert alert-success py-2 mb-3">
-                        <div class="small">Mã phiếu giữ chỗ của bạn:</div>
+                        <div class="small text-muted">Mã Phiếu Thuê / Giữ Chỗ của bạn:</div>
                         <div class="fs-4 fw-bold text-success">${res.MaPhieuThue}</div>
                     </div>
-                    <p class="small text-muted mb-1"><strong>Số điện thoại:</strong> ${phone}</p>
-                    <p class="small text-muted mb-1"><strong>Phòng:</strong> ${res.ChiTiet && res.ChiTiet[0] ? res.ChiTiet[0].SoPhong : ''}</p>
-                    <p class="small text-muted mb-1"><strong>Hình thức:</strong> ${rentType}</p>
-                    <p class="small text-muted mb-1"><strong>Dịch vụ kèm theo:</strong> ${res.DichVu && res.DichVu.length ? res.DichVu.map(d => d.TenDichVu).join(', ') : 'Không'}</p>
-                    <hr>
-                    <p class="small text-secondary mb-0">Quý khách có thể sử dụng <strong>Mã phiếu</strong> và <strong>Số điện thoại</strong> để tra cứu hoặc hủy giữ chỗ bất kỳ lúc nào.</p>
+                    <ul class="list-unstyled small mb-3">
+                        <li><strong>Số điện thoại:</strong> ${phone}</li>
+                        <li><strong>Địa chỉ:</strong> ${address}</li>
+                        <li><strong>Phòng:</strong> ${res.ChiTiet && res.ChiTiet[0] ? res.ChiTiet[0].SoPhong : ''}</li>
+                        <li><strong>Hình thức:</strong> ${rentType}</li>
+                        <li><strong>Dịch vụ kèm theo:</strong> ${servicesText}</li>
+                    </ul>
+                    <div class="alert alert-info py-2 small mb-0">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Quý khách có thể sử dụng <strong>Mã phiếu (${res.MaPhieuThue})</strong> và <strong>Số điện thoại (${phone})</strong> để tra cứu hoặc hủy đặt phòng bất kỳ lúc nào bên dưới.
+                    </div>
                 </div>
             `,
-            confirmButtonText: 'Đã hiểu'
+            confirmButtonText: 'Đã Hiểu & Xem Phiếu'
         });
+
+        // Điền tự động mã phiếu và SĐT vào khung Tra Cứu và tự động tra cứu
+        document.getElementById('lookup-code').value = res.MaPhieuThue;
+        document.getElementById('lookup-phone').value = phone;
         document.getElementById('formOnlineBooking').reset();
+        initDateTimeInputs();
+        // Bỏ chọn tất cả checkbox dịch vụ
+        document.querySelectorAll('.srv-checkbox').forEach(cb => {
+            cb.checked = false;
+            toggleServiceItem(cb.value);
+        });
+
+        // Tải lại danh sách phòng trống thực tế
+        await loadAvailableRooms();
+
+        // Cuộn xuống khung tra cứu
+        const lookupSection = document.getElementById('section-lookup');
+        if (lookupSection) {
+            lookupSection.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('formLookupBooking').dispatchEvent(new Event('submit'));
+        }
+
     } catch (err) {
         Swal.fire('Lỗi đặt phòng', err.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Xác Nhận Đặt Phòng';
+        btn.innerHTML = '<i class="fa-solid fa-check me-2"></i> Xác Nhận Đặt Phòng';
     }
 }
 
-// Mở Modal Tra cứu & Hủy đặt phòng
-function openLookupModal() {
-    const modalEl = document.getElementById('modalLookupBooking');
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    document.getElementById('lookup-result-area').classList.add('d-none');
-    document.getElementById('lookup-result-area').innerHTML = '';
-    modal.show();
-}
-
-// Xử lý Tra Cứu Phiếu Đặt
+// =============================================================================
+// TRA CỨU & HỦY ĐẶT PHÒNG
+// =============================================================================
 async function submitLookupBooking(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-lookup-submit');
@@ -552,77 +758,91 @@ async function submitLookupBooking(e) {
         const data = await RentalAPI.lookup(maPT, phone);
         resultArea.classList.remove('d-none');
 
-        let badgeBg = 'bg-warning text-dark';
-        if (data.TrangThai === 'Đang thuê') badgeBg = 'bg-primary';
-        else if (data.TrangThai === 'Hoàn tất') badgeBg = 'bg-secondary';
-        else if (data.TrangThai === 'Đã hủy') badgeBg = 'bg-danger';
+        let badgeClass = 'bg-warning text-dark';
+        if (data.TrangThai === 'Đang thuê') badgeClass = 'bg-primary text-white';
+        else if (data.TrangThai === 'Hoàn tất') badgeClass = 'bg-secondary text-white';
+        else if (data.TrangThai === 'Đã hủy') badgeClass = 'bg-danger text-white';
 
         const p = data.Phong || {};
         const kh = data.KhachHang || {};
         const services = data.DichVu || [];
 
-        let servicesHtml = '<span class="text-muted fst-italic">Không chọn dịch vụ kèm theo.</span>';
+        let servicesHtml = '<span class="text-muted fst-italic">Không có dịch vụ kèm theo.</span>';
         if (services.length > 0) {
             servicesHtml = `
-                <ul class="list-group list-group-flush small">
+                <div class="row g-2 mt-1">
                     ${services.map(s => `
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1 bg-transparent">
-                            <span><i class="fa-solid fa-check text-success me-1"></i> ${s.TenDichVu} (x${s.SoLuong})</span>
-                            <strong>${formatMoney(s.ThanhTien)}</strong>
-                        </li>
+                        <div class="col-sm-6">
+                            <div class="p-2 border rounded bg-white small d-flex justify-content-between align-items-center">
+                                <span><i class="fa-solid fa-check-circle text-success me-1"></i> ${s.TenDichVu} (x${s.SoLuong} ${s.DonViTinh})</span>
+                                <strong class="text-primary">${formatMoney(s.ThanhTien)}</strong>
+                            </div>
+                        </div>
                     `).join('')}
-                </ul>
+                </div>
             `;
         }
 
         resultArea.innerHTML = `
-            <div class="card border border-light-subtle shadow-sm bg-light">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-3">
+            <div class="card border border-2 border-primary-subtle shadow-sm bg-light-subtle rounded-3 mt-3">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3 flex-wrap gap-2">
                         <div>
-                            <span class="badge ${badgeBg} fs-6 mb-1">${data.TrangThai}</span>
-                            <h5 class="fw-bold text-dark m-0">${data.MaPhieuThue}</h5>
+                            <span class="badge ${badgeClass} badge-status-lg mb-2">${data.TrangThai}</span>
+                            <h4 class="fw-bold text-dark m-0">${data.MaPhieuThue}</h4>
                             <small class="text-muted">Ngày lập: ${formatDateTime(data.NgayLap)}</small>
                         </div>
                         <div class="text-end">
-                            <div class="fw-bold text-primary fs-5">P.${p.SoPhong || '—'}</div>
-                            <small class="text-muted">${p.TenLoai || 'Phòng tiêu chuẩn'}</small>
+                            <div class="fw-bold text-primary fs-4">Phòng ${p.SoPhong || '—'}</div>
+                            <span class="badge bg-secondary-subtle text-secondary">${p.TenLoai || 'Phòng tiêu chuẩn'}</span>
                         </div>
                     </div>
 
-                    <div class="row g-2 small mb-3">
-                        <div class="col-sm-6">
-                            <strong>Khách hàng:</strong> ${kh.HoTen || '—'}<br>
-                            <strong>Số điện thoại:</strong> ${kh.SDT || phone}<br>
-                            <strong>CCCD/CMND:</strong> ${kh.CCCD || '—'}<br>
-                            <strong>Địa chỉ:</strong> ${kh.DiaChi || '—'}
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-white rounded-3 border h-100">
+                                <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-user me-2"></i>Khách Hàng</h6>
+                                <div class="small">
+                                    <div><strong>Họ và tên:</strong> ${kh.HoTen || '—'}</div>
+                                    <div><strong>Số điện thoại:</strong> ${kh.SDT || phone}</div>
+                                    <div><strong>Số CCCD:</strong> ${kh.CCCD || '—'}</div>
+                                    <div><strong>Địa chỉ:</strong> ${kh.DiaChi || '—'}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-sm-6 border-start-sm ps-sm-3">
-                            <strong>Hình thức:</strong> ${p.HinhThucThue || 'Theo ngày'}<br>
-                            <strong>Đơn giá:</strong> ${formatMoney(p.DonGiaApDung)}<br>
-                            <strong>Nhận phòng:</strong> ${formatDateTime(p.GioNhan)}<br>
-                            <strong>Trả phòng dự kiến:</strong> ${formatDateTime(p.GioTraDuKien)}
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-white rounded-3 border h-100">
+                                <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-clock me-2"></i>Lịch Trình Lưu Trú</h6>
+                                <div class="small">
+                                    <div><strong>Hình thức thuê:</strong> ${p.HinhThucThue || 'Theo ngày'}</div>
+                                    <div><strong>Đơn giá:</strong> ${formatMoney(p.DonGiaApDung)}</div>
+                                    <div><strong>Nhận phòng:</strong> ${formatDateTime(p.GioNhan)}</div>
+                                    <div><strong>Trả phòng dự kiến:</strong> ${formatDateTime(p.GioTraDuKien)}</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-3 pt-2 border-top">
-                        <div class="fw-bold small text-dark mb-1"><i class="fa-solid fa-bell-concierge text-primary me-1"></i>Dịch vụ bổ sung đã đặt:</div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-bell-concierge text-primary me-2"></i>Dịch Vụ Đi Kèm Đã Đặt:</h6>
                         ${servicesHtml}
                     </div>
 
+                    <!-- NÚT HỦY ĐẶT PHÒNG DÀNH CHO KHÁCH HÀNG -->
                     ${data.TrangThai === 'Đã đặt' ? `
                         <div class="pt-3 border-top text-end">
-                            <button class="btn btn-danger fw-bold px-4" onclick="confirmCancelBooking('${data.MaPhieuThue}', '${phone}')">
-                                <i class="fa-solid fa-ban me-1"></i> Hủy Phiếu Đặt Phòng Này
+                            <button class="btn btn-danger btn-lg fw-bold px-4 shadow-sm" onclick="confirmCancelBooking('${data.MaPhieuThue}', '${phone}')">
+                                <i class="fa-solid fa-ban me-2"></i> Hủy Đặt Phòng Này
                             </button>
                         </div>
                     ` : (data.TrangThai === 'Đã hủy' ? `
-                        <div class="alert alert-danger py-2 small mb-0 text-center">
-                            <i class="fa-solid fa-triangle-exclamation me-1"></i> Phiếu đặt phòng này đã được hủy trước đó.
+                        <div class="alert alert-danger py-2 small mb-0 text-center fw-semibold">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i> Phiếu đặt phòng này đã được hủy và phòng đã được trả về trạng thái trống.
                         </div>
                     ` : `
-                        <div class="alert alert-info py-2 small mb-0 text-center">
-                            <i class="fa-solid fa-info-circle me-1"></i> Phiếu đang ở trạng thái '${data.TrangThai}', vui lòng liên hệ quầy lễ tân để được hỗ trợ.
+                        <div class="alert alert-info py-2 small mb-0 text-center fw-semibold">
+                            <i class="fa-solid fa-circle-info me-1"></i> Phiếu hiện đang ở trạng thái '${data.TrangThai}'. Vui lòng liên hệ quầy lễ tân nếu cần hỗ trợ.
                         </div>
                     `)}
                 </div>
@@ -631,10 +851,10 @@ async function submitLookupBooking(e) {
     } catch (err) {
         resultArea.classList.remove('d-none');
         resultArea.innerHTML = `
-            <div class="alert alert-danger py-3 text-center">
-                <i class="fa-solid fa-circle-exclamation fs-4 mb-2 d-block"></i>
-                <strong>Không tìm thấy thông tin!</strong><br>
-                ${err.message || 'Mã phiếu hoặc số điện thoại không chính xác. Vui lòng kiểm tra lại.'}
+            <div class="alert alert-danger py-4 text-center mt-3">
+                <i class="fa-solid fa-circle-exclamation fs-3 mb-2 d-block"></i>
+                <h6 class="fw-bold">Không tìm thấy thông tin phiếu!</h6>
+                <p class="small mb-0">${err.message || 'Mã phiếu thuê hoặc số điện thoại không chính xác. Quý khách vui lòng kiểm tra lại.'}</p>
             </div>
         `;
     } finally {
@@ -647,13 +867,13 @@ async function submitLookupBooking(e) {
 async function confirmCancelBooking(maPT, phone) {
     const confirm = await Swal.fire({
         title: 'Xác nhận hủy đặt phòng?',
-        text: `Quý khách có chắc chắn muốn hủy phiếu đặt ${maPT}? Phòng sẽ được giải phóng cho khách hàng khác.`,
+        text: `Quý khách có chắc chắn muốn hủy phiếu đặt ${maPT}? Phòng sẽ được giải phóng cho khách hàng khác và không thể hoàn tác.`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Đồng ý hủy',
-        cancelButtonText: 'Giữ lại'
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: '<i class="fa-solid fa-trash me-1"></i> Đồng ý hủy',
+        cancelButtonText: 'Giữ lại phiếu'
     });
 
     if (confirm.isConfirmed) {
@@ -668,14 +888,18 @@ async function confirmCancelBooking(maPT, phone) {
 
             await Swal.fire({
                 icon: 'success',
-                title: 'Đã Hủy Thành Công!',
-                text: res.message || `Phiếu đặt ${maPT} đã được hủy và phòng đã được trả về trạng thái trống.`
+                title: 'Hủy Đặt Phòng Thành Công!',
+                text: res.message || `Phiếu đặt ${maPT} đã được hủy thành công. Phòng đã được giải phóng về trạng thái trống.`
             });
 
-            // Tự động tải lại thông tin tra cứu
+            // Tải lại danh sách phòng trống thực tế
+            await loadAvailableRooms();
+
+            // Làm mới lại dữ liệu tra cứu
             document.getElementById('lookup-code').value = maPT;
             document.getElementById('lookup-phone').value = phone;
             document.getElementById('formLookupBooking').dispatchEvent(new Event('submit'));
+
         } catch (err) {
             Swal.fire('Lỗi hủy phòng', err.message, 'error');
         }
